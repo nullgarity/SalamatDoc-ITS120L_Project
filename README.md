@@ -1,24 +1,43 @@
-# Quickstart
+# SalamatDoc - ITS120L Project
 
-To start this program simply run this in the terminal
+Course Project for the Application Development and Emerging Technologies course. Includes CRUD, Login, and Register.
 
-    npm i
-    npm run dev
+## Setup
+1. Clone or pull the latest version of the repository.
+2. Install dependencies.
 
-# React + Vite
+    ```npm install```
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+    ```npm install -g firebase-tools```
+3. Login to your Firebase account.
 
-Currently, two official plugins are available:
+    ```firebase login```
+4. Link the local folder to the Firebase project
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+    ```firebase use salamatdoc-its120l-project```
+    - To check sucessful linking, run this command:
 
-## React Compiler
+        ```firebase use```
+    - It should print: ```Active Project: salamatdoc-its120l-project```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Deployment
+1. The project is connected to Firebase Hosting through GitHub Actions. Pushing to the GitHub repository will **automatically update** the deployment.
 
-## Expanding the ESLint configuration
+    - If needed, the manual deployment command in GitBash is: ```firebase deploy```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+2. Check the latest version of the app on the deployment URL: https://salamatdoc-its120l-project.web.app
 
+## Testing
+### Pull Request Previews
+- Whenever someone opens or updates a pull request (PR), a temporary preview deployment will be created.
+- Firebase posts a comment in the PR with a unique preview URL. This will allow you to **test changes live before merging**. Preview URLs are temporary and disappear when the PR is closed.
+### Live Functional Testing
+This uses the actual Firebase project linked in the setup. Inform and consult the group if you'd want to integrate emulators to enable local / offline testing.
+- *Example:* Login/Register
+  - Go to the login or register page.
+  - Create an account. This will show up in Firebase Console under **Authentication**.
+  - Log in with the same credentials. Firebase Auth will manage the session automatically.
+
+- *Example:* CRUD Operations
+  - Perform CRUD actions in the app.
+  - Check the Firebase Console under Firestore Database to confirm data changes.
