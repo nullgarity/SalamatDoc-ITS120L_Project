@@ -52,11 +52,11 @@ function Layout() {
           <Route path="/login" element={<Login />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
-          <Route
-            path="/dashboard"
-            element={<Dashboard userRole={userRole} />}
-          />
-        </Routes>
+
+          <Route path="/admin/dashboard" element={<Dashboard userRole="admin" />} />
+          <Route path="/doctor/dashboard" element={<Dashboard userRole="doctor" />} />
+          <Route path="/patient/dashboard" element={<Dashboard userRole="patient" />} />
+      </Routes>
       </div>
     </div>
   );
