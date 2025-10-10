@@ -76,3 +76,4 @@ export default function Sidebar({ collapsed, setCollapsed, role = "patient" }) {
 			</ul>
 		</aside>
 	);
+}
