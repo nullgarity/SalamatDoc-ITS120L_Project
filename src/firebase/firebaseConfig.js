@@ -1,23 +1,22 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+// src/firebase/firebaseConfig.js
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
-// Pwede tong palitan ng env files or something
 const firebaseConfig = {
-  apiKey: "AIzaSyBlI04ySruuL_zJ-n_sBF_q4WOkCp2Grzo",           // Replace this
-  authDomain: "YOUR_AUTH_DOMAIN",   // Replace this
-  projectId: "YOUR_PROJECT_ID",     // Replace this
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBlI04ySruuL_zJ-n_sBF_q4WOkCp2Grzo",
+  authDomain: "salamatdoc-its120l-project.firebaseapp.com",
+  projectId: "salamatdoc-its120l-project",
+  storageBucket: "salamatdoc-its120l-project.firebasestorage.app",
+  messagingSenderId: "793384134765",
+  appId: "1:793384134765:web:01c5d9920619818d6db764"
 };
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore
-export const db = getFirestore(app);
+// Initialize Firebase Services
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-// Initialize Auth
-export const auth = getAuth(app);
-
-export default app;
+export { app, auth, db };
