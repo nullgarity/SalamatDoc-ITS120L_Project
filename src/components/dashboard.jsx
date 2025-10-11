@@ -1,23 +1,30 @@
 import React from "react";
-import PatientDashboard from "./patient/PatientDashboard";
-import DoctorDashboard from "./doctor/DoctorDashboard";
-import AdminDashboard from "./admin/AdminDashboard";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "../../AuthContext";
+import AdminDashboard from "./dashboard/admin/AdminDashboard";
+import DoctorDashboard from "./dashboard/doctor/DoctorDashboard";
+import PatientDashboard from "./dashboard/patient/PatientDashboard";
 
 export default function Dashboard() {
-  const { profile, loading } = useAuth();
+  const { profile, user, loading } = useAuth();
 
-  if (loading) return <p>Loading...</p>;
-
-  if (!profile) {
-    return <p>No profile found. Contact admin.</p>;
+  if (loading) {
+    return <p>Loading...</p>;
   }
 
-  const role = profile.role;
+  if (!user || !profile) {
+    return <p>No user data available.</p>;
+  }
 
-  if (role === "patient") return <PatientDashboard userRole={role} />;
-  if (role === "doctor") return <DoctorDashboard userRole={role} />;
-  if (role === "admin") return <AdminDashboard userRole={role} />;
+  const role = profile.role?.toLowerCase();
 
-  return <p>No dashboard available for this role.</p>;
+  switch (role) {
+    case "admin":
+      return <AdminDashboard userData={profile} />;
+    case "doctor":
+      return <DoctorDashboard userData={profile} />;
+    case "patient":
+      return <PatientDashboard userData={profile} />;
+    default:
+      return <p>No dashboard available for this role.</p>;
+  }
 }
