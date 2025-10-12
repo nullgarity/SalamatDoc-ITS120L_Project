@@ -41,6 +41,7 @@ export default function DashboardRoutes() {
           <Route path="/" element={<DoctorDashboard />} />
           <Route path="appointments" element={<DoctorAppointments />} />
           <Route path="profile" element={<DoctorProfile />} />
+          <Route path="/dashboard" element={<DoctorDashboard />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       );
