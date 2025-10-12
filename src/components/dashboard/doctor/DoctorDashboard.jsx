@@ -1,29 +1,72 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../../firebase/firebaseConfig";
+import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
+import { db, auth } from "../../../firebase/firebaseConfig";
 import "../../dashboard.css";
+
+/**
+ * Validate and convert Firestore date fields
+ * @param {any} dateField
+ * @returns {Date | null}
+ */
+function validateAndConvertDate(dateField) {
+  if (!dateField) return null;
+  if (dateField instanceof Timestamp) return dateField.toDate();
+  const parsed = new Date(dateField);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
 
 export default function DoctorDashboard() {
   const [patients, setPatients] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchPatients();
+    fetchDashboardData();
   }, []);
 
-  const fetchPatients = async () => {
-    try {
-      const snapshot = await getDocs(collection(db, "users"));
-      const patientsData = snapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((user) => user.role === "patient");
-      setPatients(patientsData);
-    } catch (error) {
-      console.error("Error fetching patients:", error);
-    } finally {
-      setLoading(false);
+  const fetchDashboardData = async () => {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      console.error("No logged-in doctor found.");
+      return;
     }
-  };
+
+    const doctorID = user.uid;
+
+    // Fetch patients
+    const userSnapshot = await getDocs(collection(db, "users"));
+    const patientsData = userSnapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((user) => user.role === "patient");
+
+    // Fetch appointments
+    const appointmentSnapshot = await getDocs(collection(db, "appointments"));
+    const appointmentsData = appointmentSnapshot.docs
+      .map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          doctorID: data.doctorID?.trim() || "",
+          patientID: data.patientID?.trim() || "",
+          type: data.type || "",
+          location: data.location || "",
+          reason: data.reason || "",
+          notes: data.notes || "N/A",
+          dateTime: validateAndConvertDate(data.dateTime),
+        };
+      })
+      .filter((appt) => appt.doctorID === doctorID); // ✅ Filter by current doctor
+
+    setPatients(patientsData);
+    setAppointments(appointmentsData);
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   if (loading) return <p className="loading">Loading dashboard...</p>;
 
@@ -42,11 +85,25 @@ export default function DoctorDashboard() {
         {/* Appointments */}
         <div className="dashboard-card">
           <h2>Appointments</h2>
-          <ul>
-            <li>10:00 AM - John Doe</li>
-            <li>11:30 AM - Jane Smith</li>
-            <li>2:00 PM - Mark Johnson</li>
-          </ul>
+          {appointments.length > 0 ? (
+            <ul>
+              {appointments.slice(0, 5).map((appt) => (
+                <li key={appt.id}>
+                  <strong>{appt.type}</strong> —{" "}
+                  {appt.dateTime
+                    ? appt.dateTime.toLocaleString()
+                    : "Invalid Date"}
+                  <br />
+                  <span>
+                    Reason: {appt.reason} <br />
+                    Location: {appt.location}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No upcoming appointments</p>
+          )}
         </div>
 
         {/* Recent Activity */}
@@ -61,13 +118,13 @@ export default function DoctorDashboard() {
 
       <div className="dashboard-divider" />
 
-      {/* Additional dynamic section */}
+      {/* All Patients */}
       <div className="dashboard-card">
         <h2>All Patients</h2>
         <ul>
           {patients.map((p) => (
             <li key={p.id}>
-              {p.name || p.email} — {p.status || "Active"}
+              {p.first_name} {p.last_name} — {p.email}
             </li>
           ))}
         </ul>

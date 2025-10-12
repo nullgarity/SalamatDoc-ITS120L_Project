@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../firebase/firebaseConfig"; // 👈 make sure db is exported in firebase.js
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -28,8 +29,18 @@ export default function Login() {
         const profile = userSnap.data();
         console.log("Profile:", profile);
 
-        // optional: save profile in localStorage or context
+        // ✅ If no token exists, generate one and update Firestore
+        if (!profile.token) {
+          const newToken = uuidv4();
+          await updateDoc(userRef, { token: newToken });
+          profile.token = newToken;
+        }
+
+        // ✅ Save to localStorage for session use
         localStorage.setItem("userProfile", JSON.stringify(profile));
+        localStorage.setItem("authToken", profile.token);
+
+        console.log("Profile loaded:", profile);
 
         // ✅ Redirect based on role
         switch (profile.role) {
@@ -43,7 +54,8 @@ export default function Login() {
             navigate("/patient/dashboard");
             break;
           default:
-            navigate("/dashboard"); // fallback if role is missing/unknown
+            alert("No valid role found. Please contact support.");
+            navigate("/login");
         }
       }
     } catch (err) {

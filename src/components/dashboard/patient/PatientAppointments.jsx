@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { doc, getDoc, query, collection, where, getDocs } from "firebase/firestore";
-import { db } from "../../firebase/firebaseConfig";
-import { useAuth } from "../../components/AuthContext";
+import { db } from "../../../firebase/firebaseConfig";
+import { useAuth } from "../../AuthContext";
 import "./PatientAppointments.css";
 
 export default function PatientAppointments() {

@@ -83,7 +83,7 @@
  * @property {string} intake_ID
  * @property {string} patient_ID
  * @property {string} doctor_ID
- * @property {Date} date_time
+ * @property {Date} dateTime
  * @property {string} medication
  * @property {string} dosage
  * @property {"Pending" | "Completed" | "Missed"} status
