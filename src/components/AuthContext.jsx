@@ -20,9 +20,14 @@ export function AuthProvider({ children }) {
         // get Firestore profile
         const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
         if (userDoc.exists()) {
-          setProfile(userDoc.data());
+          setProfile({
+            uid: firebaseUser.uid, // ✅ attach UID
+            ...userDoc.data(),
+          });
         } else {
-          setProfile(null);
+          setProfile({
+            uid: firebaseUser.uid, // ✅ fallback UID
+          });
         }
       } else {
         setUser(null);
@@ -33,6 +38,7 @@ export function AuthProvider({ children }) {
 
     return () => unsubscribe();
   }, []);
+
 
   return (
     <AuthContext.Provider value={{ user, profile, loading }}>

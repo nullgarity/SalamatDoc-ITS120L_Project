@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "../../dashboard.css";
+import "./DailiesFood.css";
 
 export default function DailiesFood() {
   const [foods, setFoods] = useState([]);

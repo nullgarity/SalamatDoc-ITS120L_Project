@@ -1,42 +1,73 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { auth } from "../../../firebase/firebaseConfig";
+import { getDocumentById } from "../../../utils/firestoreCRUD";
 import "./PatientProfile.css";
 
 export default function PatientProfile() {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      const user = auth.currentUser;
+      if (user) {
+        const data = await getDocumentById("users", user.uid);
+        setUserData(data);
+      }
+      setLoading(false);
+    }
+
+    fetchProfile();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="profile-container">
+        <h1 className="profile-title">Loading profile...</h1>
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div className="profile-container">
+        <h1 className="profile-title">No profile data found.</h1>
+      </div>
+    );
+  }
+
   return (
-    <div className="dashboard-container">
-      <h2 className="dashboard-title">Dashboard</h2>
-
-      <div className="dashboard-content">
-        <div className="dashboard-section">
-          <h3>Welcome back, Juan!</h3>
-          <p>Here’s a quick overview of your daily health updates and appointments.</p>
+    <div className="profile-container">
+      <div className="profile-card">
+        <h3 className="profile-title">Profile</h3>
+        <hr className="divider" />
+        <div className="profile-section">
+          <p><strong>Name:</strong> {userData.name}</p>
+          <p><strong>Email Address:</strong> {userData.email}</p>
+          <p><strong>Contact Number:</strong> {userData.contactNumber}</p>
+          <p>
+            <strong>Password:</strong> ********
+            <span className="change-password">(Change Password)</span>
+          </p>
+          <p><strong>Account Creation Date:</strong> {userData.accountCreated}</p>
         </div>
 
-        <div className="dashboard-stats">
-          <div className="stat-card">
-            <h4>Upcoming Appointments</h4>
-            <p>2 scheduled this week</p>
-          </div>
+        <hr className="divider" />
 
-          <div className="stat-card">
-            <h4>Medicine Reminders</h4>
-            <p>3 medicines for today</p>
-          </div>
-
-          <div className="stat-card">
-            <h4>Food Log</h4>
-            <p>2 meals recorded</p>
-          </div>
+        <div className="profile-section">
+          <p><strong>Age:</strong> {userData.age}</p>
+          <p><strong>Gender:</strong> {userData.gender}</p>
+          <p><strong>Date of Birth:</strong> {userData.birthDate}</p>
+          <p><strong>Chronic Condition/s:</strong> {userData.chronicConditions}</p>
+          <p><strong>Allergies:</strong> {userData.allergies}</p>
         </div>
 
-        <div className="dashboard-section">
-          <h3>Recent Activity</h3>
-          <ul className="activity-list">
-            <li>Checked blood sugar level at 8:00 AM</li>
-            <li>Took Metformin (500mg) at 8:15 AM</li>
-            <li>Logged breakfast: Oatmeal with fruit</li>
-            <li>Confirmed appointment with Dr. Santos for Oct 14</li>
-          </ul>
+        <hr className="divider" />
+
+        <div className="profile-section">
+          <p><strong>Insurance Provider:</strong> {userData.insuranceProvider}</p>
+          <p><strong>Senior Citizen:</strong> {userData.isSenior ? "Yes" : "No"}</p>
+          <p><strong>PWD:</strong> {userData.isPWD ? "Yes" : "No"}</p>
         </div>
       </div>
     </div>

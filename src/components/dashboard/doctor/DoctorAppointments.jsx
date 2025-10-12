@@ -24,28 +24,32 @@ export default function DoctorAppointments() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (profile?.uid) {
-      fetchAppointments(profile.uid.trim());
+    if (user?.uid) {
+      fetchAppointments(user.uid.trim());
+    } else {
+      console.warn("User UID not available yet.");
+      setLoading(false);
     }
-  }, [profile]);
+  }, [user]);
 
   const fetchAppointments = async (doctorID) => {
+    console.log("Fetching appointments for doctor:", doctorID);
     try {
       const snapshot = await getDocs(collection(db, "appointments"));
       const data = snapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
         .filter((appt) => appt.doctorID?.trim() === doctorID);
 
+      console.log("Fetched appointments:", data);
       setAppointments(data);
     } catch (error) {
       console.error("Error loading appointments:", error);
     } finally {
+      console.log("Finished fetching appointments — setting loading to false.");
       setLoading(false);
     }
   };
+
 
   if (loading) return <p className="loading">Loading appointments...</p>;
 
@@ -77,7 +81,9 @@ export default function DoctorAppointments() {
                     <td>{appt.type || "—"}</td>
                     <td>{appt.reason || "—"}</td>
                     <td>{appt.location || "—"}</td>
-                    <td>{appt.patientID?.replace("patients/", "") || "Unknown"}</td>
+                    <td>
+                      {appt.patientID?.replace("patients/", "") || "Unknown"}
+                    </td>
                     <td>{appt.notes || "N/A"}</td>
                   </tr>
                 );

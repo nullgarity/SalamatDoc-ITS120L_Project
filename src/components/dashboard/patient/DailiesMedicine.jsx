@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import "../../dashboard.css";
 
 export default function DailiesMedicine() {
   const [meds, setMeds] = useState([]);

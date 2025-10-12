@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import "../sidebar.css";
+import "./AdminSidebar.css";
 
 export default function AdminSidebar() {
   return (

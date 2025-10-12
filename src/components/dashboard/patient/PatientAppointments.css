@@ -1,5 +1,5 @@
 .appointment-container {
-  background: linear-gradient(to bottom, #e8f4f8, #cce0f0);
+  background: lightgrey;
   min-height: 100vh;
   padding: 40px;
   display: flex;

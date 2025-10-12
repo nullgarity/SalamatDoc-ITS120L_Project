@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
 import { db, auth } from "../../../firebase/firebaseConfig";
-import "../../dashboard.css";
+import "./DoctorDashboard.css";
 
 /**
  * Validate and convert Firestore date fields
