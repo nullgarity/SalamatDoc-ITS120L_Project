@@ -1,45 +1,61 @@
-.dashboard-container {
-  background: lightgrey;
-  min-height: 100vh;
+/* ===== Add Appointment Card ===== */
+.add-appointment {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;           /* enough space inside the card */
+  max-width: 500px;           /* thinner than main card */
+  margin: 2rem auto 0;        /* centered horizontally, top spacing */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  text-align: center;         /* center all text and inline elements */
+}
+
+/* Title "Add Appointment" as regular bold text */
+.add-appointment h3 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+/* Form inside the card */
+.add-appointment form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;        /* center form elements */
+  gap: 1rem;                  /* spacing between rows */
+}
+
+/* Form rows */
+.add-appointment .form-row {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 40px 20px;
-  box-sizing: border-box;
+  gap: 0.5rem;                /* spacing between inputs in the same row */
+  flex-wrap: wrap;
 }
 
-.dashboard-card {
-  background-color: white;
-  border-radius: 15px;
-  padding: 30px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  width: 100%;
-  max-width: 1200px;
-  box-sizing: border-box;
+/* Inputs and selects */
+.add-appointment input,
+.add-appointment select {
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  min-width: 100px;
 }
 
-.appointment-table {
-  width: 100%;
-  border-collapse: collapse;
+/* Submit button */
+.add-appointment button {
+  background-color: #4caf50;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.appointment-table th {
-  text-align: left;
-  padding: 10px;
-  border-bottom: 1px solid #888;
-}
-
-.appointment-table td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-}
-
-.appointment-table tr:hover {
-  background-color: #f5f5f5;
-}
-
-.loading {
-  font-size: 18px;
-  text-align: center;
-  margin-top: 50px;
+.add-appointment button:hover {
+  background-color: #45a049;
 }
