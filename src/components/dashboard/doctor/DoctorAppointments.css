@@ -1,0 +1,99 @@
+.appointments-container {
+  background-color: #f3f3f3;
+  padding: 30px;
+  margin: 40px;
+  border-radius: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.appointments-list {
+  background-color: #dcdcdc;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.appointments-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.appointments-list th {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid #888;
+}
+
+.appointments-list td {
+  padding: 10px;
+}
+
+.appointments-list button {
+  margin-right: 8px;
+  border: none;
+  background-color: #eee;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.appointments-list button:hover {
+  background-color: #ccc;
+}
+
+.add-appointment {
+  background-color: #dcdcdc;
+  border-radius: 15px;
+  padding: 20px;
+  width: fit-content;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.add-appointment select,
+.add-appointment input {
+  margin: 8px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #aaa;
+}
+
+.add-appointment button {
+  margin-left: 10px;
+  background-color: #00a5a5;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-appointment button:hover {
+  background-color: #007e7e;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: #f2f2f2;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: 300px;
+}
+
+.modal-buttons {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+}
