@@ -1,5 +1,6 @@
+// src/components/dashboard/doctor/DoctorAppointments.jsx
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, Timestamp } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
 import { useAuth } from "../../../components/AuthContext";
 import "../../dashboard.css";
@@ -9,17 +10,13 @@ import "../../dashboard.css";
  */
 function parseDateTime(dateValue) {
   if (!dateValue) return null;
-
-  if (dateValue instanceof Timestamp) {
-    return dateValue.toDate();
-  }
-
+  if (dateValue instanceof Timestamp) return dateValue.toDate();
   const parsed = new Date(dateValue);
   return isNaN(parsed.getTime()) ? null : parsed;
 }
 
 export default function DoctorAppointments() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,30 +30,42 @@ export default function DoctorAppointments() {
   }, [user]);
 
   const fetchAppointments = async (doctorID) => {
-    console.log("Fetching appointments for doctor:", doctorID);
     try {
       const snapshot = await getDocs(collection(db, "appointments"));
-      const data = snapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((appt) => appt.doctorID?.trim() === doctorID);
 
-      console.log("Fetched appointments:", data);
+      const data = await Promise.all(
+        snapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((appt) => appt.doctorID?.trim() === doctorID)
+          .map(async (appt) => {
+            let patientName = "Unknown";
+            if (appt.patientID) {
+              try {
+                const patientDoc = await getDoc(doc(db, "users", appt.patientID));
+                if (patientDoc.exists()) {
+                  const { firstName, lastName } = patientDoc.data();
+                  patientName = `${firstName || ""} ${lastName || ""}`.trim();
+                }
+              } catch (err) {
+                console.error("Error fetching patient:", err);
+              }
+            }
+            return { ...appt, patientName };
+          })
+      );
+
       setAppointments(data);
     } catch (error) {
       console.error("Error loading appointments:", error);
     } finally {
-      console.log("Finished fetching appointments — setting loading to false.");
       setLoading(false);
     }
   };
-
 
   if (loading) return <p className="loading">Loading appointments...</p>;
 
   return (
     <div className="dashboard-container">
-      <h1>My Appointments</h1>
-
       {appointments.length === 0 ? (
         <p>No appointments scheduled.</p>
       ) : (
@@ -81,9 +90,7 @@ export default function DoctorAppointments() {
                     <td>{appt.type || "—"}</td>
                     <td>{appt.reason || "—"}</td>
                     <td>{appt.location || "—"}</td>
-                    <td>
-                      {appt.patientID?.replace("patients/", "") || "Unknown"}
-                    </td>
+                    <td>{appt.patientName}</td>
                     <td>{appt.notes || "N/A"}</td>
                   </tr>
                 );

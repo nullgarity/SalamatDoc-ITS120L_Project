@@ -1,4 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase/firebaseConfig";
 import { useAuth } from "../AuthContext";
 import "./PatientSidebar.css";
 
@@ -6,10 +8,13 @@ export default function PatientSidebar() {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = async (e) => {
-    e.preventDefault(); // prevent NavLink navigation
-    await logout(); // call the AuthContext logout
-    navigate("/login"); // redirect to login page
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/login"); // redirect to login page
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
   return (
@@ -56,11 +61,8 @@ export default function PatientSidebar() {
             Profile
           </NavLink>
         </li>
-        {/* ✅ Logout item that calls handleLogout */}
         <li>
-          <a href="/logout" onClick={(e) => { e.preventDefault(); logout(); }}>
-            Log out
-          </a>
+          <button className="logout-btn" onClick={handleLogout}>Log out</button>
         </li>
       </ul>
     </aside>

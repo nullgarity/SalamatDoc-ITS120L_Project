@@ -4,7 +4,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 
 const AuthContext = createContext();
-
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }) {
@@ -17,17 +16,11 @@ export function AuthProvider({ children }) {
       if (firebaseUser) {
         setUser(firebaseUser);
 
-        // get Firestore profile
         const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
         if (userDoc.exists()) {
-          setProfile({
-            uid: firebaseUser.uid, // ✅ attach UID
-            ...userDoc.data(),
-          });
+          setProfile({ uid: firebaseUser.uid, ...userDoc.data() });
         } else {
-          setProfile({
-            uid: firebaseUser.uid, // ✅ fallback UID
-          });
+          setProfile({ uid: firebaseUser.uid });
         }
       } else {
         setUser(null);
@@ -39,10 +32,11 @@ export function AuthProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
+  if (loading) return <div className="loading-screen">Loading...</div>;
 
   return (
     <AuthContext.Provider value={{ user, profile, loading }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }

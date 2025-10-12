@@ -29,8 +29,6 @@ export default function DashboardRoutes() {
       return (
         <Routes>
           <Route path="/" element={<AdminDashboard />} />
-          <Route path="management" element={<Management />} />
-          <Route path="profile" element={<ManagementProfile />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       );
@@ -42,6 +40,8 @@ export default function DashboardRoutes() {
           <Route path="appointments" element={<DoctorAppointments />} />
           <Route path="profile" element={<DoctorProfile />} />
           <Route path="/dashboard" element={<DoctorDashboard />} />
+          <Route path="management" element={<Management />} />
+          <Route path="profile" element={<ManagementProfile />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       );

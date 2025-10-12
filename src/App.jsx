@@ -11,12 +11,12 @@ import Contact from "./components/start/contact";
 
 // ─── Dashboard Pages ─────────────────
 import AdminDashboard from "./components/dashboard/admin/AdminDashboard";
-import Management from "./components/dashboard/admin/Management";
-import ManagementProfile from "./components/dashboard/admin/ManagementProfile";
 
 import DoctorDashboard from "./components/dashboard/doctor/DoctorDashboard";
 import DoctorAppointments from "./components/dashboard/doctor/DoctorAppointments";
 import DoctorProfile from "./components/dashboard/doctor/DoctorProfile";
+import Management from "./components/dashboard/doctor/Management";
+import ManagementProfile from "./components/dashboard/doctor/ManagementProfile";
 
 import PatientDashboard from "./components/dashboard/patient/PatientDashboard";
 import PatientAppointments from "./components/dashboard/patient/PatientAppointments";
@@ -29,15 +29,15 @@ export default function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Shared Layout (HeaderBar for start pages, Sidebar for dashboards) */}
+          {/* Shared Layout */}
           <Route path="/" element={<Layout />}>
-            {/* ─── Public / Start Pages ─── */}
+            {/* Public Pages */}
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
             <Route path="about" element={<AboutUs />} />
             <Route path="contact" element={<Contact />} />
 
-            {/* ─── Admin Routes ─── */}
+            {/* Admin */}
             <Route
               path="admin/dashboard"
               element={
@@ -46,24 +46,8 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="admin/management"
-              element={
-                <ProtectedRoute>
-                  <Management />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="admin/profile"
-              element={
-                <ProtectedRoute>
-                  <ManagementProfile />
-                </ProtectedRoute>
-              }
-            />
 
-            {/* ─── Doctor Routes ─── */}
+            {/* Doctor */}
             <Route
               path="doctor/dashboard"
               element={
@@ -81,6 +65,22 @@ export default function App() {
               }
             />
             <Route
+              path="doctor/management"
+              element={
+                <ProtectedRoute>
+                  <Management />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="doctor/management-profile"
+              element={
+                <ProtectedRoute>
+                  <ManagementProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="doctor/profile"
               element={
                 <ProtectedRoute>
@@ -89,7 +89,7 @@ export default function App() {
               }
             />
 
-            {/* ─── Patient Routes ─── */}
+            {/* Patient */}
             <Route
               path="patient/dashboard"
               element={

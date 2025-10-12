@@ -32,46 +32,51 @@ export default function DoctorProfile() {
     fetchDoctor();
   }, [user]);
 
-  if (loading) return <div>Loading profile...</div>;
-  if (!doctorData) return <div>No profile data available.</div>;
+  if (loading) {
+    return (
+      <div className="profile-container">
+        <h1 className="profile-title">Loading profile...</h1>
+      </div>
+    );
+  }
+
+  if (!doctorData) {
+    return (
+      <div className="profile-container">
+        <h1 className="profile-title">No profile data available.</h1>
+      </div>
+    );
+  }
 
   return (
-    <div className="dashboard-container">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <h2 className="logo">
-          Salamat<span>Doc</span>
-        </h2>
-        <nav>
-          <a href="/dashboard" className="active">Dashboard</a>
-          <a href="/patients">Patients</a>
-          <a href="/appointments">Appointments</a>
-          <a href="/profile">Profile</a>
-        </nav>
-        <button className="logout-btn" onClick={logout}>Log out</button>
-      </aside>
+    <div className="profile-container">
+      <div className="profile-card">
+        <h3 className="profile-title">Doctor Profile</h3>
+        <hr className="divider" />
 
-      {/* Main Content */}
-      <main className="profile-content">
-        <div className="profile-card">
-          <h3>Profile</h3>
-          <hr />
+        <div className="profile-section">
           <p><strong>Name:</strong> {doctorData.fullName}</p>
           <p><strong>E-mail Address:</strong> {doctorData.email}</p>
           <p><strong>Contact Number:</strong> {doctorData.contactNumber || "N/A"}</p>
           <p>
-            <strong>Password:</strong> ****** <a href="/change-password">(Change Password)</a>
+            <strong>Password:</strong> ********
+            <span className="change-password">(Change Password)</span>
           </p>
           <p>
             <strong>Account Creation Date:</strong>{" "}
-            {doctorData.createdAt ? new Date(doctorData.createdAt.seconds * 1000).toLocaleDateString() : "N/A"}
+            {doctorData.createdAt
+              ? new Date(doctorData.createdAt.seconds * 1000).toLocaleDateString()
+              : "N/A"}
           </p>
+        </div>
 
-          <br />
+        <hr className="divider" />
+
+        <div className="profile-section">
           <p><strong>Field:</strong> {doctorData.field || "N/A"}</p>
           <p><strong>Hospital Address & Office:</strong> {doctorData.hospitalAddress || "N/A"}</p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

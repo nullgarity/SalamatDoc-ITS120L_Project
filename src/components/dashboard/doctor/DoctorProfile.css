@@ -4,15 +4,6 @@
   font-family: "Poppins", sans-serif;
 }
 
-.sidebar {
-  width: 240px;
-  background: linear-gradient(to bottom, #00a1b6, #cbe6eb);
-  padding: 40px 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
 .logo {
   color: #fff;
   font-size: 1.8rem;
