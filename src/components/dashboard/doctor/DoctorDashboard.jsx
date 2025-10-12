@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebase/firebaseConfig";
-import "./dashboard.css";
+import { db } from "../../../firebase/firebaseConfig";
+import "../../dashboard.css";
 
 export default function DoctorDashboard() {
   const [patients, setPatients] = useState([]);

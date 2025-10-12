@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../../AuthContext";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../firebase/firebaseConfig";
-import "./dashboard.css";
+import { db } from "../../../firebase/firebaseConfig";
+import "../../dashboard.css";
 
 export default function PatientDashboard() {
   const { user } = useAuth();

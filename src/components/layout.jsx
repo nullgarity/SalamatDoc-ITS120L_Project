@@ -7,7 +7,7 @@ import { useAuth } from "./AuthContext";
 import AdminSidebar from "./sidebar/AdminSidebar";
 import DoctorSidebar from "./sidebar/DoctorSidebar";
 import PatientSidebar from "./sidebar/PatientSidebar";
-import HeaderBar from "./sidebar/HeaderBar";
+import HeaderBar from "./start/navbar";
 
 export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
