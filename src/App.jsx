@@ -10,7 +10,7 @@ import AboutUs from "./components/start/aboutus";
 import Contact from "./components/start/contact";
 
 // ─── Dashboard Pages ─────────────────
-import AdminDashboard from "./components/dashboard/admin/AdminDashboard";
+import AdminDashboard from "./components/dashboard/admin/AdminDashboard-alt";
 
 import DoctorDashboard from "./components/dashboard/doctor/DoctorDashboard";
 import DoctorAppointments from "./components/dashboard/doctor/DoctorAppointments";
