@@ -17,18 +17,18 @@ export default function PatientAppointments() {
         const patientRef = doc(db, "users", user.uid);
 
         // Query appointments where this patient is referenced
-        const q = query(collection(db, "appointments"), where("patient", "==", patientRef));
+        const q = query(collection(db, "appointments"), where("patientId", "==", patientRef)); // ✅ updated key
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-          // Get first appointment found (or map them if you want a list)
+          // Get first appointment found (or you can map all of them later)
           const apptDoc = snapshot.docs[0];
           const apptData = { id: apptDoc.id, ...apptDoc.data() };
           setAppointment(apptData);
 
           // Fetch doctor info from Firestore reference
-          if (apptData.doctor) {
-            const doctorSnap = await getDoc(apptData.doctor);
+          if (apptData.doctorId) { // ✅ updated key
+            const doctorSnap = await getDoc(apptData.doctorId); // ✅ handle as reference
             if (doctorSnap.exists()) {
               setDoctor({ id: doctorSnap.id, ...doctorSnap.data() });
             }
@@ -55,11 +55,12 @@ export default function PatientAppointments() {
   }
 
   // Safely handle Firestore Timestamp
-  const date = appointment.dateTime?.toDate().toLocaleDateString() || "N/A";
-  const time = appointment.dateTime?.toDate().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  }) || "N/A";
+  const date = appointment.dateTime?.toDate?.().toLocaleDateString?.() || "N/A";
+  const time =
+    appointment.dateTime?.toDate?.().toLocaleTimeString?.([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }) || "N/A";
 
   return (
     <div className="appointment-container">
@@ -68,7 +69,7 @@ export default function PatientAppointments() {
       <div className="appointment-card">
         <h2>Assigned Doctor</h2>
         <p>
-          <strong>Dr. {doctor.fullName || "N/A"}</strong>
+          <strong>Dr. {doctor.fullName || `${doctor.firstName || ""} ${doctor.lastName || ""}`}</strong>
         </p>
         <p>
           <strong>Field:</strong> {doctor.medicalField || "N/A"}

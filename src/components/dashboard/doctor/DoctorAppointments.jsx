@@ -51,11 +51,11 @@ export default function DoctorAppointments() {
     }
   }, [user]);
 
-  /** Fetch appointments for this doctor (using reference) */
+  /** Fetch appointments for this doctor (using doctorId reference) */
   const fetchAppointments = async (doctorUID) => {
     try {
       const doctorRef = doc(db, "users", doctorUID);
-      const q = query(collection(db, "appointments"), where("doctor", "==", doctorRef));
+      const q = query(collection(db, "appointments"), where("doctorId", "==", doctorRef)); // ✅ FIXED
       const snapshot = await getDocs(q);
 
       const data = await Promise.all(
@@ -64,9 +64,9 @@ export default function DoctorAppointments() {
           let patientName = "Unknown";
 
           // Resolve patient reference
-          if (appt.patient) {
+          if (appt.patientId) { // ✅ FIXED
             try {
-              const patientSnap = await getDoc(appt.patient);
+              const patientSnap = await getDoc(appt.patientId); // ✅ FIXED
               if (patientSnap.exists()) {
                 const p = patientSnap.data();
                 patientName = `${p.firstName || ""} ${p.lastName || ""}`.trim();
@@ -104,7 +104,7 @@ export default function DoctorAppointments() {
   /** Populate form for editing */
   const handleEditAppointment = (appt) => {
     setEditingAppointmentID(appt.id);
-    setSelectedPatient(appt.patient?.id || ""); // Reference ID
+    setSelectedPatient(appt.patientId?.id || ""); // ✅ FIXED (use patientId ref)
     setDate(appt.dateTime ? parseDateTime(appt.dateTime).toISOString().split("T")[0] : "");
     setTime(appt.dateTime ? parseDateTime(appt.dateTime).toTimeString().slice(0, 5) : "");
     setType(appt.type || "");
@@ -125,7 +125,7 @@ export default function DoctorAppointments() {
     }
   };
 
-  /** Add or Update appointment (using reference fields) */
+  /** Add or Update appointment (using doctorId/patientId references) */
   const handleAddOrUpdateAppointment = async (e) => {
     e.preventDefault();
     if (!selectedPatient || !date || !time) return alert("Fill all required fields");
