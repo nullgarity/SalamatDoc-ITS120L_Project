@@ -14,7 +14,7 @@ import {
 	limit,
 	serverTimestamp,
 } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
+import { db } from "./firebaseConfig";
 // Generate UUID without external library
 const generateUUID = () => {
 	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {

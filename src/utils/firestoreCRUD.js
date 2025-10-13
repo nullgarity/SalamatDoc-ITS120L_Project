@@ -11,6 +11,14 @@ import {
   where,
 } from "firebase/firestore";
 
+const q = query(
+  collection(db, "dailyIntake"),
+  where("patientUID", "==", patient.uid)
+);
+
+const snapshot = await getDocs(q);
+const meds = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
 // CREATE
 export async function createDocument(collectionName, data) {
   const ref = await addDoc(collection(db, collectionName), data);
@@ -33,6 +41,14 @@ export async function getDocumentById(collectionName, id) {
 // READ BY QUERY
 export async function getDocumentsByField(collectionName, field, value) {
   const q = query(collection(db, collectionName), where(field, "==", value));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}
+
+// READ BY REFERENCE
+export async function getDocumentsByReference(collectionName, field, refPath, refId) {
+  const ref = doc(db, refPath, refId);
+  const q = query(collection(db, collectionName), where(field, "==", ref));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
