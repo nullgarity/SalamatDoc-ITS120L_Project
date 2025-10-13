@@ -5,7 +5,7 @@ import {
 	updateUser,
 	deleteUser,
 	generateUserToken,
-} from "../../../services/firestoreService";
+} from "../../../firebase/firestoreService";
 
 export default function AdminDashboard() {
 	const [users, setUsers] = useState([]);

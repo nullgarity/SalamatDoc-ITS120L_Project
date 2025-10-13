@@ -11,14 +11,6 @@ import {
   where,
 } from "firebase/firestore";
 
-const q = query(
-  collection(db, "dailyIntake"),
-  where("patientUID", "==", patient.uid)
-);
-
-const snapshot = await getDocs(q);
-const meds = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
 // CREATE
 export async function createDocument(collectionName, data) {
   const ref = await addDoc(collection(db, collectionName), data);
@@ -38,7 +30,7 @@ export async function getDocumentById(collectionName, id) {
   return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
 }
 
-// READ BY QUERY
+// READ BY FIELD
 export async function getDocumentsByField(collectionName, field, value) {
   const q = query(collection(db, collectionName), where(field, "==", value));
   const snapshot = await getDocs(q);

@@ -31,7 +31,7 @@ export default function PatientSidebar() {
         </li>
         <li>
           <NavLink
-            to="/patient/medicine"
+            to="/patient/dailies/medicine"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
             Dailies – Medicine
@@ -39,7 +39,7 @@ export default function PatientSidebar() {
         </li>
         <li>
           <NavLink
-            to="/patient/food"
+            to="/patient/dailies/food"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
             Dailies – Food
