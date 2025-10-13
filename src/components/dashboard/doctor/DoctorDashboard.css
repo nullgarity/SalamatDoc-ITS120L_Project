@@ -1,7 +1,7 @@
 /* Page background and centering */
 .dashboard-container {
-  background-color: lightgray;
-  min-height: 100vh;
+  background-color: #e4e4e4;
+  min-height: 107vh;
   display: flex;
   flex-direction: column;
   align-items: center;
