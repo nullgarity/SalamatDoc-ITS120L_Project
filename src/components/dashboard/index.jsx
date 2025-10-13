@@ -11,6 +11,7 @@ import ManagementProfile from "./admin/ManagementProfile";
 import DoctorDashboard from "./doctor/DoctorDashboard";
 import DoctorProfile from "./doctor/DoctorProfile";
 import DoctorAppointments from "./doctor/DoctorAppointments";
+import PatientManagement from "./doctor/PatientManagement";
 
 // Patient
 import PatientDashboard from "./patient/PatientDashboard";
@@ -35,16 +36,17 @@ export default function DashboardRoutes() {
 
     case "Doctor":
       return (
-        <Routes>
-          <Route path="/" element={<DoctorDashboard />} />
-          <Route path="appointments" element={<DoctorAppointments />} />
-          <Route path="profile" element={<DoctorProfile />} />
-          <Route path="/dashboard" element={<DoctorDashboard />} />
-          <Route path="management" element={<Management />} />
-          <Route path="profile" element={<ManagementProfile />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      );
+				<Routes>
+					<Route path="/" element={<DoctorDashboard />} />
+					<Route path="appointments" element={<DoctorAppointments />} />
+					<Route path="profile" element={<DoctorProfile />} />
+					<Route path="/dashboard" element={<DoctorDashboard />} />
+					<Route path="management" element={<Management />} />
+					<Route path="profile" element={<ManagementProfile />} />
+					<Route path="*" element={<Navigate to="/dashboard" replace />} />
+					<Route path="patient-management/:id"element={<PatientManagement />}/>
+				</Routes>
+			);
 
     case "Patient":
       return (

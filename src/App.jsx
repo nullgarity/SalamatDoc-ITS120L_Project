@@ -18,6 +18,7 @@ import DoctorAppointments from "./components/dashboard/doctor/DoctorAppointments
 import DoctorProfile from "./components/dashboard/doctor/DoctorProfile";
 import Management from "./components/dashboard/doctor/Management";
 import ManagementProfile from "./components/dashboard/doctor/ManagementProfile";
+import PatientManagement from "./components/dashboard/doctor/PatientManagement";
 
 import PatientDashboard from "./components/dashboard/patient/PatientDashboard";
 import PatientAppointments from "./components/dashboard/patient/PatientAppointments";
@@ -27,121 +28,129 @@ import DailiesMedicine from "./components/dashboard/patient/DailiesMedicine";
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Shared Layout */}
-          <Route path="/" element={<Layout />}>
-            {/* Public Pages */}
-            <Route index element={<Home />} />
-            <Route path="login" element={<Login />} />
-            <Route path="about" element={<AboutUs />} />
-            <Route path="contact" element={<Contact />} />
+		<AuthProvider>
+			<Router>
+				<Routes>
+					{/* Shared Layout */}
+					<Route path="/" element={<Layout />}>
+						{/* Public Pages */}
+						<Route index element={<Home />} />
+						<Route path="login" element={<Login />} />
+						<Route path="about" element={<AboutUs />} />
+						<Route path="contact" element={<Contact />} />
 
-            {/* Admin */}
-            <Route
-              path="admin/dashboard"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
+						{/* Admin */}
+						<Route
+							path="admin/dashboard"
+							element={
+								<ProtectedRoute>
+									<AdminDashboard />
+								</ProtectedRoute>
+							}
+						/>
 
-            {/* Doctor */}
-            <Route
-              path="doctor/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DoctorDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="doctor/patients"
-              element={
-                <ProtectedRoute>
-                  <DoctorPatients />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="doctor/appointments"
-              element={
-                <ProtectedRoute>
-                  <DoctorAppointments />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="doctor/management"
-              element={
-                <ProtectedRoute>
-                  <Management />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="doctor/management-profile"
-              element={
-                <ProtectedRoute>
-                  <ManagementProfile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="doctor/profile"
-              element={
-                <ProtectedRoute>
-                  <DoctorProfile />
-                </ProtectedRoute>
-              }
-            />
+						{/* Doctor */}
+						<Route
+							path="doctor/dashboard"
+							element={
+								<ProtectedRoute>
+									<DoctorDashboard />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="doctor/patients"
+							element={
+								<ProtectedRoute>
+									<DoctorPatients />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="doctor/patient-management/:id"
+							element={
+								<ProtectedRoute>
+									<PatientManagement />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="doctor/appointments"
+							element={
+								<ProtectedRoute>
+									<DoctorAppointments />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="doctor/management"
+							element={
+								<ProtectedRoute>
+									<Management />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="doctor/management-profile"
+							element={
+								<ProtectedRoute>
+									<ManagementProfile />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="doctor/profile"
+							element={
+								<ProtectedRoute>
+									<DoctorProfile />
+								</ProtectedRoute>
+							}
+						/>
 
-            {/* Patient */}
-            <Route
-              path="patient/dashboard"
-              element={
-                <ProtectedRoute>
-                  <PatientDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="patient/appointments"
-              element={
-                <ProtectedRoute>
-                  <PatientAppointments />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="patient/dailies/food"
-              element={
-                <ProtectedRoute>
-                  <DailiesFood />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="patient/dailies/medicine"
-              element={
-                <ProtectedRoute>
-                  <DailiesMedicine />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="patient/profile"
-              element={
-                <ProtectedRoute>
-                  <PatientProfile />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
-        </Routes>
-      </Router>
-    </AuthProvider>
-  );
+						{/* Patient */}
+						<Route
+							path="patient/dashboard"
+							element={
+								<ProtectedRoute>
+									<PatientDashboard />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="patient/appointments"
+							element={
+								<ProtectedRoute>
+									<PatientAppointments />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="patient/dailies/food"
+							element={
+								<ProtectedRoute>
+									<DailiesFood />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="patient/dailies/medicine"
+							element={
+								<ProtectedRoute>
+									<DailiesMedicine />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="patient/profile"
+							element={
+								<ProtectedRoute>
+									<PatientProfile />
+								</ProtectedRoute>
+							}
+						/>
+					</Route>
+				</Routes>
+			</Router>
+		</AuthProvider>
+	);
 }
