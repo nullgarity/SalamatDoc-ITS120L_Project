@@ -1,0 +1,66 @@
+.patients-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.patients-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.patients-header input {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 250px;
+}
+
+/* Table styling */
+.patients-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.patients-table th,
+.patients-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+/* Hover effect for headers and rows */
+.patients-table th {
+  cursor: pointer;
+  user-select: none;
+  position: relative; /* for sort arrow positioning */
+}
+
+.patients-table th:hover {
+  background-color: #f0f0f0;
+}
+
+.patients-table tr:hover {
+  background-color: #fafafa;
+}
+
+/* Sort indicators */
+.patients-table th::after {
+  content: "";
+  margin-left: 5px;
+  font-size: 12px;
+}
+
+.patients-table th.sorted-asc::after {
+  content: " ▲";
+}
+
+.patients-table th.sorted-desc::after {
+  content: " ▼";
+}
