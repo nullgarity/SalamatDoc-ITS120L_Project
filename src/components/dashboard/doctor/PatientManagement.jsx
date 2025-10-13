@@ -42,15 +42,24 @@ export default function PatientManagement() {
 			const userData = { id: userSnap.id, ...userSnap.data() };
 			console.log("User data fetched:", userData);
 
-			// Fetch patient document (medical info) - same ID as user
-			const patientRef = doc(db, "patients", uid);
-			const patientSnap = await getDoc(patientRef);
+			// Fetch ALL patients and find the matching one
+			const allPatientsSnap = await getDocs(collection(db, "patients"));
+			console.log("Total patients in collection:", allPatientsSnap.size);
 
-			console.log("Patient snapshot exists?", patientSnap.exists());
+			let patientData = null;
+
+			allPatientsSnap.forEach((patientDoc) => {
+				console.log("Checking patient doc ID:", patientDoc.id);
+				// Check if document ID matches the UID
+				if (patientDoc.id === uid) {
+					patientData = patientDoc.data();
+					console.log("Found matching patient data:", patientData);
+				}
+			});
 
 			let combinedData = { ...userData };
-			if (patientSnap.exists()) {
-				const patientData = patientSnap.data();
+
+			if (patientData) {
 				console.log("Raw patient data from Firestore:", patientData);
 				console.log(
 					"Type of chronicIllness:",
@@ -62,13 +71,13 @@ export default function PatientManagement() {
 				combinedData = {
 					...userData,
 					...patientData,
-					// Convert chronicIllness array to string
+					// Convert chronicIllness array to string if it exists
 					chronicIllness: Array.isArray(patientData.chronicIllness)
 						? patientData.chronicIllness.join(", ")
 						: patientData.chronicIllness || "None",
 				};
 			} else {
-				console.warn("No patient document found in 'patients' collection");
+				console.warn("No patient document found with matching ID:", uid);
 			}
 
 			console.log("Final combined patient data:", combinedData);
