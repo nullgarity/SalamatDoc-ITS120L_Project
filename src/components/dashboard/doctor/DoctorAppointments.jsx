@@ -9,6 +9,8 @@ import {
   deleteDoc,
   Timestamp,
   serverTimestamp,
+  query,
+  where,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
 import { useAuth } from "../../../components/AuthContext";
@@ -49,30 +51,35 @@ export default function DoctorAppointments() {
     }
   }, [user]);
 
-  /** Fetch appointments for this doctor */
-  const fetchAppointments = async (doctorID) => {
+  /** Fetch appointments for this doctor (using reference) */
+  const fetchAppointments = async (doctorUID) => {
     try {
-      const snapshot = await getDocs(collection(db, "appointments"));
+      const doctorRef = doc(db, "users", doctorUID);
+      const q = query(collection(db, "appointments"), where("doctor", "==", doctorRef));
+      const snapshot = await getDocs(q);
+
       const data = await Promise.all(
-        snapshot.docs
-          .map((doc) => ({ id: doc.id, ...doc.data() }))
-          .filter((appt) => appt.doctorID?.trim() === doctorID)
-          .map(async (appt) => {
-            let patientName = "Unknown";
-            if (appt.patientID) {
-              try {
-                const patientDoc = await getDoc(doc(db, "users", appt.patientID));
-                if (patientDoc.exists()) {
-                  const { firstName, lastName } = patientDoc.data();
-                  patientName = `${firstName || ""} ${lastName || ""}`.trim();
-                }
-              } catch (err) {
-                console.error("Error fetching patient:", err);
+        snapshot.docs.map(async (docSnap) => {
+          const appt = { id: docSnap.id, ...docSnap.data() };
+          let patientName = "Unknown";
+
+          // Resolve patient reference
+          if (appt.patient) {
+            try {
+              const patientSnap = await getDoc(appt.patient);
+              if (patientSnap.exists()) {
+                const p = patientSnap.data();
+                patientName = `${p.firstName || ""} ${p.lastName || ""}`.trim();
               }
+            } catch (err) {
+              console.error("Error fetching patient:", err);
             }
-            return { ...appt, patientName };
-          })
+          }
+
+          return { ...appt, patientName };
+        })
       );
+
       setAppointments(data);
     } catch (err) {
       console.error("Error loading appointments:", err);
@@ -97,7 +104,7 @@ export default function DoctorAppointments() {
   /** Populate form for editing */
   const handleEditAppointment = (appt) => {
     setEditingAppointmentID(appt.id);
-    setSelectedPatient(appt.patientID || "");
+    setSelectedPatient(appt.patient?.id || ""); // Reference ID
     setDate(appt.dateTime ? parseDateTime(appt.dateTime).toISOString().split("T")[0] : "");
     setTime(appt.dateTime ? parseDateTime(appt.dateTime).toTimeString().slice(0, 5) : "");
     setType(appt.type || "");
@@ -118,7 +125,7 @@ export default function DoctorAppointments() {
     }
   };
 
-  /** Add or Update appointment */
+  /** Add or Update appointment (using reference fields) */
   const handleAddOrUpdateAppointment = async (e) => {
     e.preventDefault();
     if (!selectedPatient || !date || !time) return alert("Fill all required fields");
@@ -129,9 +136,12 @@ export default function DoctorAppointments() {
       const [hours, minutes] = time.split(":").map(Number);
       const dateTime = new Date(year, month - 1, day, hours, minutes);
 
+      const doctorRef = doc(db, "users", user.uid);
+      const patientRef = doc(db, "users", selectedPatient);
+
       const data = {
-        doctorID: user.uid,
-        patientID: selectedPatient,
+        doctorId: doctorRef,
+        patientId: patientRef,
         dateTime: Timestamp.fromDate(dateTime),
         type: type || "",
         reason: reason || "",
@@ -169,7 +179,7 @@ export default function DoctorAppointments() {
 
   return (
     <div className="dashboard-container">
-      {/* Scrollable Appointments Table (above form) */}
+      {/* Scrollable Appointments Table */}
       {appointments.length === 0 ? (
         <p>No appointments scheduled.</p>
       ) : (

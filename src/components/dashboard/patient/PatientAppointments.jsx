@@ -13,18 +13,26 @@ export default function PatientAppointments() {
   useEffect(() => {
     const fetchAppointment = async () => {
       try {
-        // Find appointment for the logged-in patient
-        const patientRef = doc(db, "patients", user.uid);
+        // Reference to patient document
+        const patientRef = doc(db, "users", user.uid);
+
+        // Query appointments where this patient is referenced
         const q = query(collection(db, "appointments"), where("patient", "==", patientRef));
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-          const apptData = snapshot.docs[0].data();
+          // Get first appointment found (or map them if you want a list)
+          const apptDoc = snapshot.docs[0];
+          const apptData = { id: apptDoc.id, ...apptDoc.data() };
           setAppointment(apptData);
 
-          // Fetch the assigned doctor info
-          const doctorSnap = await getDoc(apptData.doctor);
-          if (doctorSnap.exists()) setDoctor(doctorSnap.data());
+          // Fetch doctor info from Firestore reference
+          if (apptData.doctor) {
+            const doctorSnap = await getDoc(apptData.doctor);
+            if (doctorSnap.exists()) {
+              setDoctor({ id: doctorSnap.id, ...doctorSnap.data() });
+            }
+          }
         }
       } catch (err) {
         console.error("Error loading appointment:", err);
@@ -46,8 +54,12 @@ export default function PatientAppointments() {
     );
   }
 
-  const date = appointment.date_time.toDate().toLocaleDateString();
-  const time = appointment.date_time.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  // Safely handle Firestore Timestamp
+  const date = appointment.dateTime?.toDate().toLocaleDateString() || "N/A";
+  const time = appointment.dateTime?.toDate().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  }) || "N/A";
 
   return (
     <div className="appointment-container">
@@ -56,19 +68,21 @@ export default function PatientAppointments() {
       <div className="appointment-card">
         <h2>Assigned Doctor</h2>
         <p>
-          <strong>Dr. {doctor.user_fullname}</strong>
+          <strong>Dr. {doctor.fullName || "N/A"}</strong>
         </p>
         <p>
-          <strong>Field:</strong> {doctor.medical_field}
+          <strong>Field:</strong> {doctor.medicalField || "N/A"}
         </p>
         <p>
-          <strong>Email:</strong> {doctor.email}
+          <strong>Email:</strong> {doctor.email || "N/A"}
         </p>
         <p>
-          <strong>Contact Number:</strong> {doctor.office_contact_no}
+          <strong>Contact Number:</strong> {doctor.officeContactNo || "N/A"}
         </p>
         <p>
-          <strong>Hospital Address & Office:</strong> {doctor.place_employment}, Room {doctor.office_room_no}, {doctor.address}
+          <strong>Hospital Address & Office:</strong>{" "}
+          {doctor.placeOfEmployment || "N/A"}, Room {doctor.officeRoomNo || "N/A"},{" "}
+          {doctor.officeAddress || "N/A"}
         </p>
 
         <hr className="appointment-divider" />
@@ -81,7 +95,13 @@ export default function PatientAppointments() {
           <strong>Date:</strong> {date}
         </p>
         <p>
-          <strong>Location:</strong> {appointment.location}
+          <strong>Location:</strong> {appointment.location || "N/A"}
+        </p>
+        <p>
+          <strong>Type:</strong> {appointment.type || "N/A"}
+        </p>
+        <p>
+          <strong>Reason:</strong> {appointment.reason || "N/A"}
         </p>
 
         <p className="appointment-note">

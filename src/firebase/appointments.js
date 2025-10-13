@@ -1,119 +1,135 @@
-import { 
-  collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, 
-  serverTimestamp, Timestamp, query, where 
+import { db } from "../firebase/firebaseConfig";
+import {
+  collection,
+  doc,
+  serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
-import { db } from "./firebaseConfig";
+import {
+  createDocument,
+  getAllDocuments,
+  getDocumentsByField,
+  getDocumentById,
+  updateDocument,
+  deleteDocument,
+} from "./firestoreService";
 
 /**
  * @typedef {import("../types/firestoreType").Appointment} Appointment
  */
 
 /**
- * Validates and converts the dateTime field to a Firestore Timestamp.
+ * Converts various date formats to Firestore Timestamp
  * @param {any} dateValue
  * @returns {Timestamp}
  */
-const validateAndConvertDate = (dateValue) => {
+const toFirestoreTimestamp = (dateValue) => {
   if (!dateValue) throw new Error("Missing required field: dateTime");
 
-  let parsedDate;
   if (dateValue instanceof Timestamp) return dateValue;
-  if (typeof dateValue === "string" || dateValue instanceof Date) {
-    parsedDate = new Date(dateValue);
-  } else {
-    throw new Error("Invalid dateTime format: must be a Date, string, or Firestore Timestamp");
+
+  const parsed =
+    typeof dateValue === "string" ? new Date(dateValue) : dateValue;
+
+  if (!(parsed instanceof Date) || isNaN(parsed.getTime())) {
+    throw new Error("Invalid dateTime format: must be Date or valid string");
   }
 
-  if (isNaN(parsedDate.getTime())) {
-    throw new Error("Invalid dateTime value: could not parse into a valid Date");
-  }
-
-  return Timestamp.fromDate(parsedDate);
+  return Timestamp.fromDate(parsed);
 };
 
 /**
- * Create a new appointment.
- * @param {Omit<Appointment, "appointment_ID">} appointmentData 
+ * Creates a new appointment
+ * @param {Object} appointmentData
+ * @param {string} appointmentData.patientID - Firestore patient document ID
+ * @param {string} appointmentData.doctorID - Firestore doctor document ID
+ * @param {string} appointmentData.type
+ * @param {string} appointmentData.location
+ * @param {string} appointmentData.reason
+ * @param {string} [appointmentData.notes]
+ * @param {Date|string|Timestamp} appointmentData.dateTime
  * @returns {Promise<string>} appointment document ID
  */
 export const createAppointment = async (appointmentData) => {
-  const ref = collection(db, "appointments");
-
   const validData = {
-    ...appointmentData,
-    dateTime: validateAndConvertDate(appointmentData.dateTime),
+    patient: doc(db, "patients", appointmentData.patientID),
+    doctor: doc(db, "doctors", appointmentData.doctorID),
+    type: appointmentData.type,
+    location: appointmentData.location,
+    reason: appointmentData.reason,
+    notes: appointmentData.notes || "",
+    dateTime: toFirestoreTimestamp(appointmentData.dateTime),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
 
-  const docRef = await addDoc(ref, validData);
-  return docRef.id;
+  return await createDocument("appointments", validData);
 };
 
 /**
- * Get all appointments.
+ * Get all appointments
  * @returns {Promise<Appointment[]>}
  */
 export const getAllAppointments = async () => {
-  const ref = collection(db, "appointments");
-  const snapshot = await getDocs(ref);
-  return snapshot.docs.map(d => ({
-    appointment_ID: d.id,
-    ...d.data(),
-  }));
+  return await getAllDocuments("appointments");
 };
 
 /**
- * Get appointments for a specific doctor.
+ * Get all appointments for a specific doctor
  * @param {string} doctorID
  * @returns {Promise<Appointment[]>}
  */
 export const getAppointmentsByDoctor = async (doctorID) => {
-  const ref = collection(db, "appointments");
-  const q = query(ref, where("doctorID", "==", doctorID));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(d => ({
-    appointment_ID: d.id,
-    ...d.data(),
-  }));
+  // We query by reference, not string
+  const doctorRef = doc(db, "doctors", doctorID);
+  return await getDocumentsByField("appointments", "doctor", doctorRef);
 };
 
 /**
- * Get appointments for a specific patient.
+ * Get all appointments for a specific patient
  * @param {string} patientID
  * @returns {Promise<Appointment[]>}
  */
 export const getAppointmentsByPatient = async (patientID) => {
-  const ref = collection(db, "appointments");
-  const q = query(ref, where("patientID", "==", patientID));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(d => ({
-    appointment_ID: d.id,
-    ...d.data(),
-  }));
+  const patientRef = doc(db, "patients", patientID);
+  return await getDocumentsByField("appointments", "patient", patientRef);
 };
 
 /**
- * Update an appointment by ID.
- * @param {string} appointment_ID
+ * Get appointment by ID
+ * @param {string} appointmentID
+ * @returns {Promise<Appointment|null>}
+ */
+export const getAppointmentById = async (appointmentID) => {
+  return await getDocumentById("appointments", appointmentID);
+};
+
+/**
+ * Update an appointment by ID
+ * @param {string} appointmentID
  * @param {Partial<Appointment>} updatedData
  */
-export const updateAppointment = async (appointment_ID, updatedData) => {
-  const ref = doc(db, "appointments", appointment_ID);
+export const updateAppointment = async (appointmentID, updatedData) => {
+  const newData = { ...updatedData };
 
-  const validData = { ...updatedData };
   if (updatedData.dateTime) {
-    validData.dateTime = validateAndConvertDate(updatedData.dateTime);
+    newData.dateTime = toFirestoreTimestamp(updatedData.dateTime);
   }
 
-  await updateDoc(ref, { ...validData, updatedAt: serverTimestamp() });
+  if (updatedData.patientID)
+    newData.patient = doc(db, "patients", updatedData.patientID);
+  if (updatedData.doctorID)
+    newData.doctor = doc(db, "doctors", updatedData.doctorID);
+
+  newData.updatedAt = serverTimestamp();
+
+  await updateDocument("appointments", appointmentID, newData);
 };
 
 /**
- * Delete an appointment by ID.
- * @param {string} appointment_ID
+ * Delete an appointment by ID
+ * @param {string} appointmentID
  */
-export const deleteAppointment = async (appointment_ID) => {
-  const ref = doc(db, "appointments", appointment_ID);
-  await deleteDoc(ref);
+export const deleteAppointment = async (appointmentID) => {
+  await deleteDocument("appointments", appointmentID);
 };
