@@ -13,6 +13,7 @@ import Contact from "./components/start/contact";
 import AdminDashboard from "./components/dashboard/admin/AdminDashboard";
 
 import DoctorDashboard from "./components/dashboard/doctor/DoctorDashboard";
+import DoctorPatients from "./components/dashboard/doctor/DoctorPatients";
 import DoctorAppointments from "./components/dashboard/doctor/DoctorAppointments";
 import DoctorProfile from "./components/dashboard/doctor/DoctorProfile";
 import Management from "./components/dashboard/doctor/Management";
@@ -53,6 +54,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <DoctorDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="doctor/patients"
+              element={
+                <ProtectedRoute>
+                  <DoctorPatients />
                 </ProtectedRoute>
               }
             />

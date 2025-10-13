@@ -6,6 +6,7 @@ import {
 	deleteUser,
 	generateUserToken,
 } from "../../../services/firestoreService";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
 	const [users, setUsers] = useState([]);
