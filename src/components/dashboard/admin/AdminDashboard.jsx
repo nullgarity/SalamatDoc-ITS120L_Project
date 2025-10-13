@@ -111,7 +111,7 @@ export default function AdminDashboard() {
 	return (
 		<main className="dashboard-container">
 			<div className="dashboard-header">
-				<h1>Admin Dashboard</h1>
+				<h3>Admin Dashboard</h3>
 				<button onClick={handleAddNew} className="btn btn-primary">
 					Add New User
 				</button>

@@ -29,27 +29,6 @@ export default function AdminSidebar() {
 					</NavLink>
 				</li>
 				<li>
-					<NavLink
-						to="/admin/users"
-						className={({ isActive }) => (isActive ? "active" : "")}>
-						Manage Users
-					</NavLink>
-				</li>
-				<li>
-					<NavLink
-						to="/admin/reports"
-						className={({ isActive }) => (isActive ? "active" : "")}>
-						Reports
-					</NavLink>
-				</li>
-				<li>
-					<NavLink
-						to="/admin/settings"
-						className={({ isActive }) => (isActive ? "active" : "")}>
-						Settings
-					</NavLink>
-				</li>
-				<li>
 					<button className="logout-btn" onClick={handleLogout}>
 						Log out
 					</button>
