@@ -5,15 +5,16 @@ import {
   doc,
   getDoc,
   addDoc,
+  updateDoc,
+  deleteDoc,
   Timestamp,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
 import { useAuth } from "../../../components/AuthContext";
 import "./DoctorAppointments.css";
 
-/**
- * Safely parse Firestore timestamps or strings.
- */
+/** Safely parse Firestore timestamps or strings */
 function parseDateTime(dateValue) {
   if (!dateValue) return null;
   if (dateValue instanceof Timestamp) return dateValue.toDate();
@@ -31,8 +32,12 @@ export default function DoctorAppointments() {
   const [selectedPatient, setSelectedPatient] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [amPm, setAmPm] = useState("AM");
+  const [type, setType] = useState("");
+  const [reason, setReason] = useState("");
+  const [location, setLocation] = useState("");
+  const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [editingAppointmentID, setEditingAppointmentID] = useState(null);
 
   useEffect(() => {
     if (user?.uid) {
@@ -44,10 +49,10 @@ export default function DoctorAppointments() {
     }
   }, [user]);
 
+  /** Fetch appointments for this doctor */
   const fetchAppointments = async (doctorID) => {
     try {
       const snapshot = await getDocs(collection(db, "appointments"));
-
       const data = await Promise.all(
         snapshot.docs
           .map((doc) => ({ id: doc.id, ...doc.data() }))
@@ -68,15 +73,15 @@ export default function DoctorAppointments() {
             return { ...appt, patientName };
           })
       );
-
       setAppointments(data);
-    } catch (error) {
-      console.error("Error loading appointments:", error);
+    } catch (err) {
+      console.error("Error loading appointments:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  /** Fetch all patients */
   const fetchPatients = async () => {
     try {
       const snapshot = await getDocs(collection(db, "users"));
@@ -89,37 +94,72 @@ export default function DoctorAppointments() {
     }
   };
 
-  const handleAddAppointment = async (e) => {
+  /** Populate form for editing */
+  const handleEditAppointment = (appt) => {
+    setEditingAppointmentID(appt.id);
+    setSelectedPatient(appt.patientID || "");
+    setDate(appt.dateTime ? parseDateTime(appt.dateTime).toISOString().split("T")[0] : "");
+    setTime(appt.dateTime ? parseDateTime(appt.dateTime).toTimeString().slice(0, 5) : "");
+    setType(appt.type || "");
+    setReason(appt.reason || "");
+    setLocation(appt.location || "");
+    setNotes(appt.notes || "");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  /** Delete appointment */
+  const handleDeleteAppointment = async (appointmentID) => {
+    if (!window.confirm("Are you sure you want to delete this appointment?")) return;
+    try {
+      await deleteDoc(doc(db, "appointments", appointmentID));
+      fetchAppointments(user.uid);
+    } catch (err) {
+      console.error("Error deleting appointment:", err);
+    }
+  };
+
+  /** Add or Update appointment */
+  const handleAddOrUpdateAppointment = async (e) => {
     e.preventDefault();
-    if (!selectedPatient || !date || !time) return alert("Fill all fields");
+    if (!selectedPatient || !date || !time) return alert("Fill all required fields");
 
     setSubmitting(true);
     try {
-      // Convert date + time to JS Date
-      const [year, month, day] = date.split("-"); // yyyy-mm-dd
-      let [hours, minutes] = time.split(":").map(Number);
-      if (amPm === "PM" && hours < 12) hours += 12;
-      if (amPm === "AM" && hours === 12) hours = 0;
+      const [year, month, day] = date.split("-");
+      const [hours, minutes] = time.split(":").map(Number);
       const dateTime = new Date(year, month - 1, day, hours, minutes);
 
-      await addDoc(collection(db, "appointments"), {
+      const data = {
         doctorID: user.uid,
         patientID: selectedPatient,
         dateTime: Timestamp.fromDate(dateTime),
-        type: "",
-        reason: "",
-        location: "",
-        notes: "",
-      });
+        type: type || "",
+        reason: reason || "",
+        location: location || "",
+        notes: notes || "",
+        updatedAt: serverTimestamp(),
+      };
 
-      // Refresh appointments
+      if (editingAppointmentID) {
+        await updateDoc(doc(db, "appointments", editingAppointmentID), data);
+        setEditingAppointmentID(null);
+      } else {
+        data.createdAt = serverTimestamp();
+        await addDoc(collection(db, "appointments"), data);
+      }
+
       fetchAppointments(user.uid);
+
+      // Reset form
       setSelectedPatient("");
       setDate("");
       setTime("");
-      setAmPm("AM");
+      setType("");
+      setReason("");
+      setLocation("");
+      setNotes("");
     } catch (err) {
-      console.error("Error adding appointment:", err);
+      console.error("Error saving appointment:", err);
     } finally {
       setSubmitting(false);
     }
@@ -129,11 +169,11 @@ export default function DoctorAppointments() {
 
   return (
     <div className="dashboard-container">
-      {/* Appointments Table */}
+      {/* Scrollable Appointments Table (above form) */}
       {appointments.length === 0 ? (
         <p>No appointments scheduled.</p>
       ) : (
-        <div className="dashboard-card">
+        <div className="dashboard-card table-container">
           <table className="appointment-table">
             <thead>
               <tr>
@@ -143,6 +183,7 @@ export default function DoctorAppointments() {
                 <th>Location</th>
                 <th>Patient</th>
                 <th>Notes</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -156,6 +197,20 @@ export default function DoctorAppointments() {
                     <td>{appt.location || "—"}</td>
                     <td>{appt.patientName}</td>
                     <td>{appt.notes || "N/A"}</td>
+                    <td className="actions-cell">
+                      <button
+                        className="action-btn edit-btn full-width-btn"
+                        onClick={() => handleEditAppointment(appt)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="action-btn delete-btn full-width-btn"
+                        onClick={() => handleDeleteAppointment(appt.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
@@ -164,12 +219,11 @@ export default function DoctorAppointments() {
         </div>
       )}
 
-      {/* Add Appointment Form */}
-      <div className="dashboard-card add-appointment" style={{ marginTop: "20px" }}>
-        <h3>Add Appointment</h3>
-        <form className="add-appointment-form" onSubmit={handleAddAppointment}>
-          {/* Row 1: Select Patient */}
-          <div>
+      {/* Add/Edit Appointment Form */}
+      <div className="dashboard-card add-appointment">
+        <h3>{editingAppointmentID ? "Edit Appointment" : "Add Appointment"}</h3>
+        <form className="add-appointment-form" onSubmit={handleAddOrUpdateAppointment}>
+          <div className="form-row">
             <select
               value={selectedPatient}
               onChange={(e) => setSelectedPatient(e.target.value)}
@@ -182,32 +236,48 @@ export default function DoctorAppointments() {
                 </option>
               ))}
             </select>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
           </div>
 
-          {/* Row 2: Date */}
-          <div>
+          <div className="form-row">
             <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
+              type="text"
+              placeholder="Type"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
             />
           </div>
 
-          {/* Row 3: Time + AM/PM + Submit */}
-          <div>
+          <div className="form-row">
             <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              required
+              type="text"
+              placeholder="Location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
             />
-            <select value={amPm} onChange={(e) => setAmPm(e.target.value)}>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-            </select>
+            <textarea
+              placeholder="Notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </div>
+
+          <div className="form-row">
             <button type="submit" disabled={submitting}>
-              {submitting ? "Adding..." : "Submit"}
+              {submitting
+                ? editingAppointmentID
+                  ? "Updating..."
+                  : "Adding..."
+                : editingAppointmentID
+                ? "Update Appointment"
+                : "Add Appointment"}
             </button>
           </div>
         </form>

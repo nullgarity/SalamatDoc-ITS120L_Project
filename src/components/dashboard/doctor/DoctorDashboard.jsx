@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, Timestamp } from "firebase/firestore";
 import { db, auth } from "../../../firebase/firebaseConfig";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import "./DoctorDashboard.css";
 
 function validateAndConvertDate(dateField) {
@@ -14,6 +16,7 @@ export default function DoctorDashboard() {
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
     fetchDashboardData();
@@ -30,6 +33,7 @@ export default function DoctorDashboard() {
       const patientsData = userSnapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
         .filter((u) => u.role === "patient");
+      setPatients(patientsData);
 
       // Fetch appointments
       const appointmentSnapshot = await getDocs(collection(db, "appointments"));
@@ -49,9 +53,8 @@ export default function DoctorDashboard() {
           };
         })
         .filter((appt) => appt.doctorID === doctorID);
-
-      setPatients(patientsData);
       setAppointments(appointmentsData);
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -61,9 +64,26 @@ export default function DoctorDashboard() {
 
   if (loading) return <p className="loading">Loading dashboard...</p>;
 
+  // Collect appointment dates for highlighting
+  const appointmentDates = appointments
+    .filter(a => a.dateTime)
+    .map((a) => a.dateTime.toDateString());
+
+  // Filter appointments for selected day
+  const appointmentsForSelectedDay = appointments.filter(
+    (a) => a.dateTime && a.dateTime.toDateString() === selectedDate.toDateString()
+  );
+
+  // Helper to get patient full name
+  const getPatientName = (id) => {
+    const patient = patients.find((p) => p.id === id);
+    if (!patient) return "Unknown";
+    return `${patient.first_name || patient.firstName || ""} ${patient.last_name || patient.lastName || ""}`.trim();
+  };
+
   return (
     <div className="dashboard-container">
-      {/* Row 1: Patient count */}
+      {/* Row 1: Patient Overview */}
       <div className="dashboard-row">
         <div className="dashboard-card overview-card">
           <h2>Patient Overview</h2>
@@ -100,7 +120,7 @@ export default function DoctorDashboard() {
 
                 return (
                   <tr key={p.id}>
-                    <td>{p.first_name} {p.last_name}</td>
+                    <td>{getPatientName(p.id)}</td>
                     <td>{patientAppointments || "No appointments"}</td>
                     <td>{meds}</td>
                   </tr>
@@ -115,8 +135,32 @@ export default function DoctorDashboard() {
       <div className="dashboard-row">
         <div className="dashboard-card calendar-card">
           <h2>Appointment Calendar</h2>
-          {/* Placeholder for calendar */}
-          <p>Calendar component can go here.</p>
+          <Calendar
+            value={selectedDate}
+            onChange={setSelectedDate}
+            tileClassName={({ date, view }) =>
+              view === "month" && appointmentDates.includes(date.toDateString())
+                ? "highlight-appointment"
+                : null
+            }
+          />
+
+          {/* Appointments for selected day */}
+          {appointmentsForSelectedDay.length > 0 ? (
+            <div className="appointments-list">
+              <h3>Appointments on {selectedDate.toDateString()}:</h3>
+              <ul>
+                {appointmentsForSelectedDay.map((a) => (
+                  <li key={a.id}>
+                    {a.type || "Checkup"} with {getPatientName(a.patientID)} {" "}
+                    ({a.dateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p>No appointments on this day.</p>
+          )}
         </div>
       </div>
     </div>
