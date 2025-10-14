@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../../AuthContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
-import "./PatientDashboard.css"; // ✅ separate CSS for patient
+import "./PatientDashboard.css";
 
 export default function PatientDashboard() {
   const { user } = useAuth();
@@ -35,8 +35,9 @@ export default function PatientDashboard() {
 
   return (
     <div className="patient-dashboard">
-      <h3 className="dashboard-title">Patient Dashboard</h3>
-
+      <br />
+      <br />
+      <br />
       <div className="dashboard-grid">
         {/* Profile Card */}
         <div className="dashboard-card">
