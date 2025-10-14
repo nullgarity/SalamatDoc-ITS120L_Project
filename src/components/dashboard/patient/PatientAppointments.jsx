@@ -10,44 +10,53 @@ export default function PatientAppointments() {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Helper to safely parse Firestore Timestamp
+  const parseDate = (timestamp) => {
+    if (!timestamp) return null;
+    if (timestamp.toDate) return timestamp.toDate();
+    return new Date(timestamp);
+  };
+
   useEffect(() => {
     const fetchAppointment = async () => {
       try {
+        if (!user?.uid) return;
+
         // Reference to patient document
         const patientRef = doc(db, "users", user.uid);
 
-        // Query appointments where this patient is referenced
-        const q = query(collection(db, "appointments"), where("patientId", "==", patientRef)); // ✅ updated key
+        // Query appointments for this patient
+        const q = query(collection(db, "appointments"), where("patientId", "==", patientRef));
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-          // Get first appointment found (or you can map all of them later)
           const apptDoc = snapshot.docs[0];
           const apptData = { id: apptDoc.id, ...apptDoc.data() };
           setAppointment(apptData);
 
-          // Fetch doctor info from Firestore reference
+          // Fetch doctor info
           if (apptData.doctorId) {
-  try {
-    // Fetch the doctor’s user data
-    const doctorUserSnap = await getDoc(apptData.doctorId);
-    let doctorData = {};
+            try {
+              // Step 1: fetch doctor user document
+              const doctorUserSnap = await getDoc(apptData.doctorId);
+              if (!doctorUserSnap.exists()) return;
 
-    if (doctorUserSnap.exists()) {
-      doctorData = { id: doctorUserSnap.id, ...doctorUserSnap.data() };
-    }
+              const userData = { id: doctorUserSnap.id, ...doctorUserSnap.data() };
 
-    // Fetch the matching doctor profile in /doctors (same ID as user)
-    const doctorProfileSnap = await getDoc(doc(db, "doctors", doctorUserSnap.id));
-      if (doctorProfileSnap.exists()) {
-            doctorData = { ...doctorData, ...doctorProfileSnap.data() };
+              // Step 2: fetch doctor profile from /doctors by uid field
+              const doctorQuery = query(
+                collection(db, "doctors"),
+                where("uid", "==", doctorUserSnap.id)
+              );
+              const doctorSnap = await getDocs(doctorQuery);
+              const profileData = !doctorSnap.empty ? doctorSnap.docs[0].data() : {};
+
+              // Merge both user + profile data
+              setDoctor({ ...userData, ...profileData });
+            } catch (err) {
+              console.error("Error fetching doctor details:", err);
+            }
           }
-
-          setDoctor(doctorData);
-        } catch (err) {
-          console.error("Error fetching doctor details:", err);
-        }
-      }
         }
       } catch (err) {
         console.error("Error loading appointment:", err);
@@ -56,7 +65,7 @@ export default function PatientAppointments() {
       }
     };
 
-    if (user?.uid) fetchAppointment();
+    fetchAppointment();
   }, [user]);
 
   if (loading) return <div className="appointment-loading">Loading...</div>;
@@ -70,9 +79,9 @@ export default function PatientAppointments() {
   }
 
   // Safely handle Firestore Timestamp
-  const date = appointment.dateTime?.toDate?.().toLocaleDateString?.() || "N/A";
+  const date = parseDate(appointment.dateTime)?.toLocaleDateString() || "N/A";
   const time =
-    appointment.dateTime?.toDate?.().toLocaleTimeString?.([], {
+    parseDate(appointment.dateTime)?.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     }) || "N/A";
@@ -84,7 +93,9 @@ export default function PatientAppointments() {
       <div className="appointment-card">
         <h2>Assigned Doctor</h2>
         <p>
-          <strong>Dr. {doctor.fullName || `${doctor.firstName || ""} ${doctor.lastName || ""}`}</strong>
+          <strong>
+            Dr. {doctor.fullName || `${doctor.firstName || ""} ${doctor.lastName || ""}`}
+          </strong>
         </p>
         <p>
           <strong>Field:</strong> {doctor.medicalField || "N/A"}

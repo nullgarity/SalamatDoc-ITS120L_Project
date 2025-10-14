@@ -61,3 +61,49 @@
   padding: 3rem;
   color: #555;
 }
+
+.week-grid {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.day-box {
+  flex: 1;
+  margin: 0 2px;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.status-bar {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.status-meal, .status-med {
+  flex: 1;
+  padding: 0.2rem;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.8rem;
+}
+
+.legend {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.legend-box {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-right: 0.3rem;
+  vertical-align: middle;
+  border-radius: 3px;
+}
