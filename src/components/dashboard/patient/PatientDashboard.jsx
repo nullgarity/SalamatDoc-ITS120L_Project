@@ -159,8 +159,9 @@ export default function PatientDashboard() {
 
   return (
     <div className="patient-dashboard">
-      <h3 className="dashboard-title">Patient Dashboard</h3>
-
+      <br />
+      <br />
+      <br />
       <div className="dashboard-grid">
         {/* Profile Card */}
         <div className="dashboard-card">
