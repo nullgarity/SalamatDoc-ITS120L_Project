@@ -1,28 +1,28 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./start.css";
 
-export default function Home() {
+export default function Contact() {
   return (
     <div
-      className="d-flex justify-content-center align-items-center text-center text-white"
-      style={{
-        backgroundImage: "url('../Contact.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        minHeight: "100vh",
-      }}
+      className="page-section"
+      style={{ backgroundImage: "url('../Contact.jpg')" }}
     >
-      <div className="container bg-white text-dark rounded-4 shadow-lg p-5" style={{ maxWidth: "700px" }}>
-        <h1 className="fw-bold mb-4">Contact</h1> 
-        <p className="fs-4">
-                Are you interested as a patient? Email us through SalamatDoc@applications.com to get the patient application process started. Through email, we’ll guide you however much you need throughout the process.
+      <div className="page-container">
+        <h2 className="page-title">Contact</h2>
+        <p className="page-text">
+          <strong>Are you interested as a patient?</strong>
+          <br />Email us through: <strong>SalamatDoc@applications.com</strong>
+          <br />
+          Email us to get the application process started. We’ll guide you however much you need
+          throughout the process.
         </p>
-        <p className="fs-4">
-                 Are you interested in becoming a SalamatDoc doctor? Email us through SalamatDoc@applications.com to begin. You will undergo an authentication and screening process for everyone’s safety, security, and health.
-        </p>
-        <hr />
-        <p className="">
-          <strong>THINK OF CATCHPHRASE</strong>
+        <p className="page-text">
+          <strong>Are you interested in becoming a SalamatDoc doctor?</strong>
+          <br />Email us through: <strong>SalamatDoc@applications.com</strong>
+          <br />
+          Emailing us will begin the process. You will undergo an authentication and screening process for everyone’s safety,
+          security, and health. We only accept qualified and certified doctors that will do their best to help patients.
         </p>
       </div>
     </div>
