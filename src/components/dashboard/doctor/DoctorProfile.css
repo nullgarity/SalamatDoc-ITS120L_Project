@@ -71,6 +71,7 @@
   max-width: 850px;
   box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15);
   transition: 0.3s ease;
+  text-align: left;
 }
 
 .profile-card:hover {

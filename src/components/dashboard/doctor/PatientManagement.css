@@ -1,39 +1,218 @@
-.patient-management-page {
-  padding: 1.5rem 2rem;
-  font-family: "Poppins", sans-serif;
+.patient-management-container {
+  padding: 20px;
   background-color: #f5f5f5;
+  min-height: 100vh;
 }
 
-.page-header {
-  background: #333;
-  color: white;
-  padding: 0.75rem 1rem;
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.loading, .error-message {
+  padding: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #d32f2f;
+  background-color: #ffebee;
   border-radius: 8px;
-  margin-bottom: 1.5rem;
 }
 
-.info-grid {
+.content-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
+/* Card Styles */
 .card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 1rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
-.card h4 {
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 0.3rem;
-  margin-bottom: 0.5rem;
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #333;
 }
 
-.data-item {
-  background: #e4e4e4;
+/* Prescriptions Card */
+.prescriptions-card {
+  background: #d9d9d9;
+  min-height: 250px;
+}
+
+.prescriptions-list {
+  margin-top: 10px;
+}
+
+.prescription-item {
+  background: white;
+  padding: 12px;
   border-radius: 8px;
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 10px;
+  border-left: 3px solid #4caf50;
+}
+
+.presc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.presc-header strong {
+  font-size: 16px;
+  color: #333;
+}
+
+.frequency-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.presc-details {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.presc-details div {
+  margin-bottom: 4px;
+}
+
+/* Patient Info Card */
+.patient-info-card {
+  background: #e8e8e8;
+  min-height: 400px;
+}
+
+.info-label {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.info-content p {
+  font-size: 14px;
+  margin-bottom: 10px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.info-content strong {
+  font-weight: 600;
+  color: #000;
+}
+
+/* Meals Card */
+.meals-card {
+  background: #d1d1d1;
+  min-height: 180px;
+}
+
+.meals-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+/* Appointment Card */
+.appointment-card {
+  background: #d9d9d9;
+  min-height: 150px;
+}
+
+.appointment-content {
+  margin-top: 10px;
+}
+
+.appointment-item {
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.appointment-item p {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.no-scheduled {
+  text-align: center;
+  padding: 30px;
+  font-size: 16px;
+  color: #666;
+}
+
+/* Medical History Card */
+.medical-history-card {
+  background: #c8dce8;
+  min-height: 250px;
+}
+
+.history-content {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #333;
+}
+
+.history-content h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 10px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.history-item {
+  margin-bottom: 8px;
+  padding-left: 10px;
+}
+
+/* Common utility classes */
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .patient-management-container {
+    padding: 15px;
+  }
+  
+  .card {
+    padding: 15px;
+  }
+  
+  .page-title {
+    font-size: 20px;
+  }
 }
