@@ -1,312 +1,211 @@
 import React, { useEffect, useState } from "react";
-import { auth } from "../../../firebase/firebaseConfig";
-import { getDocumentById } from "../../../utils/firestoreCRUD";
-import { updateDocument } from "../../../utils/firestoreCRUD";
+import { doc, getDoc, collection, query, where, getDocs, updateDoc } from "firebase/firestore";
+import { db, auth } from "../../../firebase/firebaseConfig";
+import { useAuth } from "../../../components/AuthContext";
 import "./PatientProfile.css";
 
 export default function PatientProfile() {
-	const [userData, setUserData] = useState(null);
-	const [editData, setEditData] = useState(null);
-	const [loading, setLoading] = useState(true);
-	const [isEditing, setIsEditing] = useState(false);
-	const [isSaving, setIsSaving] = useState(false);
-	const [error, setError] = useState("");
+  const { profile, loading: authLoading } = useAuth();
+  const [patientData, setPatientData] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [editData, setEditData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
-	useEffect(() => {
-		async function fetchProfile() {
-			const user = auth.currentUser;
-			if (user) {
-				const data = await getDocumentById("users", user.uid);
-				setUserData(data);
-				setEditData(data);
-			}
-			setLoading(false);
-		}
+  // Password change
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
-		fetchProfile();
-	}, []);
+  useEffect(() => {
+    if (!profile) return;
 
-	const handleEdit = () => {
-		setIsEditing(true);
-		setError("");
-	};
+    const fetchPatientProfile = async () => {
+      try {
+        const userRef = doc(db, "users", profile.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) setUserData(userSnap.data());
 
-	const handleCancel = () => {
-		setEditData({ ...userData });
-		setIsEditing(false);
-		setError("");
-	};
+        const patientQuery = query(collection(db, "patients"), where("uid", "==", userRef));
+        const snapshot = await getDocs(patientQuery);
 
-	const handleChange = (field, value) => {
-		setEditData((prev) => ({
-			...prev,
-			[field]: value,
-		}));
-	};
+        if (!snapshot.empty) {
+          const data = snapshot.docs[0].data();
+          setPatientData(data);
+          setEditData({ ...userSnap.data(), ...data });
+        } else {
+          console.warn("No patient profile found");
+        }
+      } catch (err) {
+        console.error("Error fetching patient profile:", err);
+        setError("Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-	const handleSave = async () => {
-		setError("");
+    fetchPatientProfile();
+  }, [profile]);
 
-		// Validation
-		if (!editData.name || editData.name.trim() === "") {
-			setError("Name is required");
-			return;
-		}
-		if (!editData.contactNumber || editData.contactNumber.trim() === "") {
-			setError("Contact number is required");
-			return;
-		}
-		if (!editData.age || editData.age < 0) {
-			setError("Valid age is required");
-			return;
-		}
+  const handleEdit = () => {
+    setIsEditing(true);
+    setError("");
+  };
 
-		setIsSaving(true);
+  const handleCancel = () => {
+    setEditData({ ...userData, ...patientData });
+    setIsEditing(false);
+    setError("");
+  };
 
-		try {
-			const user = auth.currentUser;
-			if (user) {
-				// Update Firestore
-				await updateDocument("users", user.uid, editData);
-				setUserData({ ...editData });
-				setIsEditing(false);
-			}
-		} catch (err) {
-			setError("Failed to save changes. Please try again.");
-			console.error("Error updating profile:", err);
-		} finally {
-			setIsSaving(false);
-		}
-	};
+  const handleChange = (field, value) => {
+    setEditData(prev => ({ ...prev, [field]: value }));
+  };
 
-	if (loading) {
-		return (
-			<div className="profile-container">
-				<h1 className="profile-title">Loading profile...</h1>
-			</div>
-		);
-	}
+  const handleSave = async () => {
+    setError("");
+    setIsSaving(true);
 
-	if (!userData) {
-		return (
-			<div className="profile-container">
-				<h1 className="profile-title">No profile data found.</h1>
-			</div>
-		);
-	}
+    try {
+      const userRef = doc(db, "users", profile.uid);
 
-	return (
-		<div className="profile-container">
-			<div className="profile-card">
-				<div
-					style={{
-						display: "flex",
-						justifyContent: "space-between",
-						alignItems: "center",
-					}}>
-					<h3 className="profile-title">Profile</h3>
-					{!isEditing ? (
-						<button onClick={handleEdit} className="edit-button">
-							Edit Profile
-						</button>
-					) : (
-						<div style={{ display: "flex", gap: "10px" }}>
-							<button
-								onClick={handleSave}
-								disabled={isSaving}
-								className="save-button">
-								{isSaving ? "Saving..." : "Save"}
-							</button>
-							<button
-								onClick={handleCancel}
-								disabled={isSaving}
-								className="cancel-button">
-								Cancel
-							</button>
-						</div>
-					)}
-				</div>
+      const patientQuery = query(collection(db, "patients"), where("uid", "==", userRef));
+      const snapshot = await getDocs(patientQuery);
+      if (!snapshot.empty) {
+        const patientDocRef = snapshot.docs[0].ref;
+        await updateDoc(patientDocRef, {
+          chronicIllness: editData.chronicIllness || [],
+          allergies: editData.allergies || [],
+          insuranceProvider: editData.insuranceProvider || "",
+          seniorCitizenStatus: editData.seniorCitizenStatus || false,
+          pwdStatus: editData.pwdStatus || false
+        });
+        setPatientData({ ...editData });
+      }
 
-				{error && <div className="error-message">{error}</div>}
+      await updateDoc(userRef, {
+        firstName: editData.firstName,
+        lastName: editData.lastName,
+        email: editData.email,
+        contactNumber: editData.contactNumber,
+        address: editData.address,
+        birthDate: editData.birthDate,
+        gender: editData.gender,
+      });
+      setUserData({ ...editData });
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Error saving profile:", err);
+      setError("Failed to save changes");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-				<hr className="divider" />
+  const handlePasswordChange = async () => {
+    setPasswordError("");
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError("All fields are required");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
 
-				<div className="profile-section">
-					<p>
-						<strong>Name:</strong>{" "}
-						{isEditing ? (
-							<input
-								type="text"
-								value={editData.name || ""}
-								onChange={(e) => handleChange("name", e.target.value)}
-								className="edit-input"
-							/>
-						) : (
-							userData.name
-						)}
-					</p>
-					<p>
-						<strong>Email Address:</strong> {userData.email}
-					</p>
-					<p>
-						<strong>Contact Number:</strong>{" "}
-						{isEditing ? (
-							<input
-								type="tel"
-								value={editData.contactNumber || ""}
-								onChange={(e) => handleChange("contactNumber", e.target.value)}
-								className="edit-input"
-							/>
-						) : (
-							userData.contactNumber
-						)}
-					</p>
-					<p>
-						<strong>Password:</strong> ********
-						<span className="change-password">(Change Password)</span>
-					</p>
-					<p>
-						<strong>Account Creation Date:</strong> {userData.accountCreated}
-					</p>
-				</div>
+    setPasswordLoading(true);
+    try {
+      // Reauthenticate user
+      const user = auth.currentUser;
+      const credential = auth.EmailAuthProvider.credential(user.email, currentPassword);
+      await user.reauthenticateWithCredential(credential);
 
-				<hr className="divider" />
+      // Update password
+      await user.updatePassword(newPassword);
+      setIsChangingPassword(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      alert("Password updated successfully!");
+    } catch (err) {
+      console.error(err);
+      setPasswordError("Failed to update password. Check current password.");
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
-				<div className="profile-section">
-					<p>
-						<strong>Age:</strong>{" "}
-						{isEditing ? (
-							<input
-								type="number"
-								value={editData.age || ""}
-								onChange={(e) =>
-									handleChange("age", parseInt(e.target.value) || 0)
-								}
-								className="edit-input"
-								min="0"
-							/>
-						) : (
-							userData.age
-						)}
-					</p>
-					<p>
-						<strong>Gender:</strong>{" "}
-						{isEditing ? (
-							<select
-								value={editData.gender || ""}
-								onChange={(e) => handleChange("gender", e.target.value)}
-								className="edit-input">
-								<option value="">Select Gender</option>
-								<option value="Male">Male</option>
-								<option value="Female">Female</option>
-								<option value="Other">Other</option>
-							</select>
-						) : (
-							userData.gender
-						)}
-					</p>
-					<p>
-						<strong>Date of Birth:</strong>{" "}
-						{isEditing ? (
-							<input
-								type="date"
-								value={editData.birthDate || ""}
-								onChange={(e) => handleChange("birthDate", e.target.value)}
-								className="edit-input"
-							/>
-						) : (
-							userData.birthDate
-						)}
-					</p>
-					<p>
-						<strong>Chronic Condition/s:</strong>{" "}
-						{isEditing ? (
-							<input
-								type="text"
-								value={editData.chronicConditions || ""}
-								onChange={(e) =>
-									handleChange("chronicConditions", e.target.value)
-								}
-								className="edit-input"
-								placeholder="None or list conditions"
-							/>
-						) : (
-							userData.chronicConditions
-						)}
-					</p>
-					<p>
-						<strong>Allergies:</strong>{" "}
-						{isEditing ? (
-							<input
-								type="text"
-								value={editData.allergies || ""}
-								onChange={(e) => handleChange("allergies", e.target.value)}
-								className="edit-input"
-								placeholder="None or list allergies"
-							/>
-						) : (
-							userData.allergies
-						)}
-					</p>
-				</div>
+  if (authLoading || loading) return <p>Loading profile...</p>;
+  if (!userData) return <p>No profile data found.</p>;
 
-				<hr className="divider" />
+  return (
+    <div className="profile-container" style={{ textAlign: "left" }}>
+      <div className="profile-card">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h3>Patient Profile</h3>
+          {!isEditing ? (
+            <button onClick={handleEdit}>Edit Profile</button>
+          ) : (
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button onClick={handleSave} disabled={isSaving}>{isSaving ? "Saving..." : "Save"}</button>
+              <button onClick={handleCancel} disabled={isSaving}>Cancel</button>
+            </div>
+          )}
+        </div>
 
-				<div className="profile-section">
-					<p>
-						<strong>Insurance Provider:</strong>{" "}
-						{isEditing ? (
-							<input
-								type="text"
-								value={editData.insuranceProvider || ""}
-								onChange={(e) =>
-									handleChange("insuranceProvider", e.target.value)
-								}
-								className="edit-input"
-								placeholder="None or provider name"
-							/>
-						) : (
-							userData.insuranceProvider
-						)}
-					</p>
-					<p>
-						<strong>Senior Citizen:</strong>{" "}
-						{isEditing ? (
-							<select
-								value={editData.isSenior ? "Yes" : "No"}
-								onChange={(e) =>
-									handleChange("isSenior", e.target.value === "Yes")
-								}
-								className="edit-input">
-								<option value="No">No</option>
-								<option value="Yes">Yes</option>
-							</select>
-						) : userData.isSenior ? (
-							"Yes"
-						) : (
-							"No"
-						)}
-					</p>
-					<p>
-						<strong>PWD:</strong>{" "}
-						{isEditing ? (
-							<select
-								value={editData.isPWD ? "Yes" : "No"}
-								onChange={(e) =>
-									handleChange("isPWD", e.target.value === "Yes")
-								}
-								className="edit-input">
-								<option value="No">No</option>
-								<option value="Yes">Yes</option>
-							</select>
-						) : userData.isPWD ? (
-							"Yes"
-						) : (
-							"No"
-						)}
-					</p>
-				</div>
-			</div>
-		</div>
-	);
+        {error && <div className="error-message">{error}</div>}
+        <hr />
+
+        {/* User Info */}
+        <p><strong>First Name:</strong> {isEditing ? <input value={editData.firstName} onChange={e => handleChange("firstName", e.target.value)} /> : userData.firstName}</p>
+        <p><strong>Last Name:</strong> {isEditing ? <input value={editData.lastName} onChange={e => handleChange("lastName", e.target.value)} /> : userData.lastName}</p>
+        <p><strong>Email:</strong> {isEditing ? <input value={editData.email} onChange={e => handleChange("email", e.target.value)} /> : userData.email}</p>
+        <p><strong>Contact Number:</strong> {isEditing ? <input value={editData.contactNumber} onChange={e => handleChange("contactNumber", e.target.value)} /> : userData.contactNumber}</p>
+
+        {/* Password change */}
+        <p>
+          <strong>Password:</strong> ********{" "}
+          {!isChangingPassword ? (
+            <span className="change-password" style={{ cursor: "pointer", color: "blue" }} onClick={() => setIsChangingPassword(true)}>(Change Password)</span>
+          ) : null}
+        </p>
+
+        {isChangingPassword && (
+          <div style={{ marginTop: "10px", marginBottom: "10px" }}>
+            {passwordError && <p className="error-message">{passwordError}</p>}
+            <input type="password" placeholder="Current Password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} />
+            <input type="password" placeholder="New Password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+            <input type="password" placeholder="Confirm New Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+            <div style={{ marginTop: "5px" }}>
+              <button onClick={handlePasswordChange} disabled={passwordLoading}>{passwordLoading ? "Updating..." : "Update Password"}</button>
+              <button onClick={() => setIsChangingPassword(false)} disabled={passwordLoading}>Cancel</button>
+            </div>
+          </div>
+        )}
+
+        <p><strong>Birth Date:</strong> {isEditing ? <input type="date" value={editData.birthDate} onChange={e => handleChange("birthDate", e.target.value)} /> : userData.birthDate}</p>
+        <p><strong>Gender:</strong> {isEditing ? <select value={editData.gender} onChange={e => handleChange("gender", e.target.value)}><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select> : userData.gender}</p>
+
+        <hr />
+
+        {/* Patient-specific info */}
+        {patientData ? (
+          <>
+            <p><strong>Chronic Illness:</strong> {isEditing ? <input value={(editData.chronicIllness || []).join(", ")} onChange={e => handleChange("chronicIllness", e.target.value.split(",").map(i => i.trim()))} /> : (patientData.chronicIllness || []).join(", ")}</p>
+            <p><strong>Allergies:</strong> {isEditing ? <input value={(editData.allergies || []).join(", ")} onChange={e => handleChange("allergies", e.target.value.split(",").map(i => i.trim()))} /> : (patientData.allergies || []).join(", ")}</p>
+            <p><strong>Insurance Provider:</strong> {isEditing ? <input value={editData.insuranceProvider || ""} onChange={e => handleChange("insuranceProvider", e.target.value)} /> : patientData.insuranceProvider}</p>
+            <p><strong>Senior Citizen:</strong> {isEditing ? <select value={editData.seniorCitizenStatus ? "Yes" : "No"} onChange={e => handleChange("seniorCitizenStatus", e.target.value === "Yes")}><option value="No">No</option><option value="Yes">Yes</option></select> : patientData.seniorCitizenStatus ? "Yes" : "No"}</p>
+            <p><strong>PWD:</strong> {isEditing ? <select value={editData.pwdStatus ? "Yes" : "No"} onChange={e => handleChange("pwdStatus", e.target.value === "Yes")}><option value="No">No</option><option value="Yes">Yes</option></select> : patientData.pwdStatus ? "Yes" : "No"}</p>
+          </>
+        ) : (
+          <p>No patient profile found.</p>
+        )}
+      </div>
+    </div>
+  );
 }

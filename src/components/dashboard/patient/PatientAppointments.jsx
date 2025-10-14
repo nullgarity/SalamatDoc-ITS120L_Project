@@ -27,12 +27,27 @@ export default function PatientAppointments() {
           setAppointment(apptData);
 
           // Fetch doctor info from Firestore reference
-          if (apptData.doctorId) { // ✅ updated key
-            const doctorSnap = await getDoc(apptData.doctorId); // ✅ handle as reference
-            if (doctorSnap.exists()) {
-              setDoctor({ id: doctorSnap.id, ...doctorSnap.data() });
-            }
+          if (apptData.doctorId) {
+  try {
+    // Fetch the doctor’s user data
+    const doctorUserSnap = await getDoc(apptData.doctorId);
+    let doctorData = {};
+
+    if (doctorUserSnap.exists()) {
+      doctorData = { id: doctorUserSnap.id, ...doctorUserSnap.data() };
+    }
+
+    // Fetch the matching doctor profile in /doctors (same ID as user)
+    const doctorProfileSnap = await getDoc(doc(db, "doctors", doctorUserSnap.id));
+      if (doctorProfileSnap.exists()) {
+            doctorData = { ...doctorData, ...doctorProfileSnap.data() };
           }
+
+          setDoctor(doctorData);
+        } catch (err) {
+          console.error("Error fetching doctor details:", err);
+        }
+      }
         }
       } catch (err) {
         console.error("Error loading appointment:", err);
