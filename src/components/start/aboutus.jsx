@@ -1,43 +1,26 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./start.css";
 
-export default function Home() {
+export default function AboutUs() {
   return (
     <div
-      style={{
-        backgroundImage: "url('../Home.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        minHeight: "100vh",
-        
-      }}
+      className="page-section"
+      style={{ backgroundImage: "url('../Home.png')" }}
     >
-      <div
-        style={{
-        backgroundColor: "rgba(255, 255, 255, 0.5)", // 👈 50% white overlay
-        padding: "2rem",
-        borderRadius: "1rem",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-        minHeight: "100vh",
-        }}
-      >
-        <div className="container-fluid d-flex justify-content-center align-items-center" style={{ minHeight: "100vh" }}>
-          <div className="card p-4 shadow-lg" style={{ maxWidth: "700px" }}>
-            <h1 className="fw-bold mb-4">Accessible Online Health</h1> 
-            <p className="lead">
-              We’re dedicated to connecting patients to qualified doctors in a way that is safe, efficient, and effective for all.
-            </p>
-            <p>
-                With a future-oriented mindset, we don’t shy away from technology. This has 
-                allowed us to remotely connect you to our partnered doctors , ensuring you stay fit and 
-                healthy even in the comfort of your own home.
-            </p>
-            <hr />
-            <p className="mb-0">
-              <strong>THINK OF CATCHPHRASE</strong>
-            </p>
-          </div>
-        </div>
+      <div className="page-container">
+        <h2 className="page-title">About Us</h2>
+        <p className="page-text">
+          We’re dedicated to connecting patients to qualified doctors in a way that is safe, efficient, and effective.
+          With a mix of technology and classic human ingenuity and expertise, we made SalamatDoc.
+          This has allowed us to remotely connect you to our partnered doctors, ensuring you stay fit and healthy even in the comfort of your own home.
+        </p>
+        <p className="page-text">
+          The SalamatDoc website only allows account creation through contacting us. This ensures that everyone on the platform is legitimate, trustworthy, and safe.
+        </p>
+        <p className="page-text">
+          Better services, better care, better health. Salamat, Doc!
+        </p>
       </div>
     </div>
   );

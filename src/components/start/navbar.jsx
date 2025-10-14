@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "./navbar.css"
 
 export default function Navbar() {
   return (
@@ -9,7 +10,7 @@ export default function Navbar() {
       <div className="container-fluid mx-md-5 mx-lg-7">
         <Link className="navbar-brand fw-bold fs-1" to="/">
           <span className="text-dark">Salamat</span>
-  <       span className="text-white">Doc</span>
+          <span className="text-white">Doc</span>
         </Link>
 
         <button

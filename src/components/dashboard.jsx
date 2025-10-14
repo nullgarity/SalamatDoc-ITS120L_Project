@@ -1,8 +1,9 @@
 import React from "react";
 import { useAuth } from "../../AuthContext";
-import AdminDashboard from "./dashboard/admin/AdminDashboard";
+import AdminDashboard from "./dashboard/admin/AdminDashboard-alt";
 import DoctorDashboard from "./dashboard/doctor/DoctorDashboard";
 import PatientDashboard from "./dashboard/patient/PatientDashboard";
+import "./dashboard_global.css";
 
 export default function Dashboard() {
   const { profile, user, loading } = useAuth();

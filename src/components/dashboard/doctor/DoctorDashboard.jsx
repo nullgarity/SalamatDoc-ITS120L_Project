@@ -1,76 +1,160 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../../firebase/firebaseConfig";
-import "../../dashboard.css";
+import { collection, query, where, getDocs, doc, getDoc, Timestamp } from "firebase/firestore";
+import { db, auth } from "../../../firebase/firebaseConfig";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import "./DoctorDashboard.css";
+
+// Safely convert Firestore Timestamp or string to JS Date
+function parseDate(dateValue) {
+  if (!dateValue) return null;
+  if (dateValue instanceof Timestamp) return dateValue.toDate();
+  const parsed = new Date(dateValue);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
 
 export default function DoctorDashboard() {
   const [patients, setPatients] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
-    fetchPatients();
+    const fetchData = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      try {
+        // Fetch patients
+        const userSnapshot = await getDocs(collection(db, "users"));
+        const patientsData = userSnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(u => u.role === "patient");
+        setPatients(patientsData);
+
+        // Fetch appointments for this doctor
+        const doctorRef = doc(db, "users", user.uid);
+        const apptQuery = query(collection(db, "appointments"), where("doctorId", "==", doctorRef));
+        const snapshot = await getDocs(apptQuery);
+
+        const data = await Promise.all(snapshot.docs.map(async (d) => {
+          const appt = d.data();
+
+          // Resolve patient name
+          let patientName = "Unknown";
+          let patientId = null;
+          if (appt.patientId) {
+            try {
+              const patientSnap = await getDoc(appt.patientId);
+              if (patientSnap.exists()) {
+                const p = patientSnap.data();
+                patientName = `${p.firstName || ""} ${p.lastName || ""}`.trim();
+                patientId = patientSnap.id;
+              }
+            } catch (err) {
+              console.error("Error fetching patient:", err);
+            }
+          }
+
+          return {
+            id: d.id,
+            patientName,
+            patientId,
+            dateTime: parseDate(appt.dateTime),
+            type: appt.type || "",
+            location: appt.location || "",
+            notes: appt.notes || "",
+            reason: appt.reason || "",
+          };
+        }));
+
+        setAppointments(data);
+      } catch (err) {
+        console.error("Error loading dashboard:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const fetchPatients = async () => {
-    try {
-      const snapshot = await getDocs(collection(db, "users"));
-      const patientsData = snapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((user) => user.role === "patient");
-      setPatients(patientsData);
-    } catch (error) {
-      console.error("Error fetching patients:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (loading) return <p>Loading dashboard...</p>;
 
-  if (loading) return <p className="loading">Loading dashboard...</p>;
+  // Dates with appointments
+  const appointmentDates = appointments
+    .filter(a => a.dateTime)
+    .map(a => a.dateTime.toDateString());
+
+  const appointmentsForSelectedDay = appointments.filter(
+    a => a.dateTime && a.dateTime.toDateString() === selectedDate.toDateString()
+  );
+
+  const getPatientName = (id) => {
+    const patient = patients.find(p => p.id === id);
+    return patient ? `${patient.firstName || ""} ${patient.lastName || ""}`.trim() : "Unknown";
+  };
 
   return (
     <div className="dashboard-container">
-      <h1>Doctor Dashboard</h1>
-
-      <div className="dashboard-grid">
-        {/* Patient Overview */}
-        <div className="dashboard-card">
-          <h2>Patient Overview</h2>
-          <p>Active Patients: {patients.length}</p>
-          <p>Pending Checkups: {Math.floor(patients.length / 4)}</p>
-        </div>
-
-        {/* Appointments */}
-        <div className="dashboard-card">
-          <h2>Appointments</h2>
-          <ul>
-            <li>10:00 AM - John Doe</li>
-            <li>11:30 AM - Jane Smith</li>
-            <li>2:00 PM - Mark Johnson</li>
-          </ul>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="dashboard-card">
-          <h2>Recent Activity</h2>
-          <ul>
-            <li>Prescription sent to Mary</li>
-            <li>Updated records for Alex</li>
-          </ul>
-        </div>
+      {/* Patient Overview */}
+      <div className="dashboard-card">
+        <h2>Patient Overview</h2>
+        <p>Active Patients: {patients.length}</p>
+        <p>Pending Checkups: {Math.floor(patients.length / 4)}</p>
       </div>
 
-      <div className="dashboard-divider" />
-
-      {/* Additional dynamic section */}
+      {/* Patients Table */}
       <div className="dashboard-card">
-        <h2>All Patients</h2>
-        <ul>
-          {patients.map((p) => (
-            <li key={p.id}>
-              {p.name || p.email} — {p.status || "Active"}
-            </li>
-          ))}
-        </ul>
+        <h2>Patients</h2>
+        <table className="appointment-table">
+          <thead>
+            <tr>
+              <th>Patient Name</th>
+              <th>Appointments</th>
+            </tr>
+          </thead>
+          <tbody>
+            {patients.map(p => {
+              const patientAppts = appointments
+                .filter(a => a.patientId === p.id)
+                .map(a => a.dateTime ? a.dateTime.toLocaleDateString() : "N/A")
+                .join(", ");
+              return (
+                <tr key={p.id}>
+                  <td>{getPatientName(p.id)}</td>
+                  <td>{patientAppts || "No appointments"}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Appointment Calendar */}
+      <div className="dashboard-card">
+        <h2>Appointment Calendar</h2>
+        <Calendar
+          value={selectedDate}
+          onChange={setSelectedDate}
+          tileClassName={({ date, view }) =>
+            view === "month" && appointmentDates.includes(date.toDateString())
+              ? "highlight-appointment"
+              : null
+          }
+        />
+
+        {appointmentsForSelectedDay.length > 0 ? (
+          <ul>
+            {appointmentsForSelectedDay.map(a => (
+              <li key={a.id}>
+                {a.dateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} — {a.patientName} ({a.type || "Checkup"})
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No appointments on this day.</p>
+        )}
       </div>
     </div>
   );

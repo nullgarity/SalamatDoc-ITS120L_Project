@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../../firebase/firebaseConfig"; // 👈 make sure db is exported in firebase.js
-import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../../firebase/firebaseConfig";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./start.css";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -11,27 +13,28 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const email = e.target.email.value;
     const password = e.target.password.value;
 
     try {
-      // ✅ Firebase login
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // ✅ Get Firestore profile
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
 
       if (userSnap.exists()) {
         const profile = userSnap.data();
-        console.log("Profile:", profile);
 
-        // optional: save profile in localStorage or context
+        if (!profile.token) {
+          const newToken = uuidv4();
+          await updateDoc(userRef, { token: newToken });
+          profile.token = newToken;
+        }
+
         localStorage.setItem("userProfile", JSON.stringify(profile));
+        localStorage.setItem("authToken", profile.token);
 
-        // ✅ Redirect based on role
         switch (profile.role) {
           case "admin":
             navigate("/admin/dashboard");
@@ -43,57 +46,65 @@ export default function Login() {
             navigate("/patient/dashboard");
             break;
           default:
-            navigate("/dashboard"); // fallback if role is missing/unknown
+            alert("No valid role found. Please contact support.");
+            navigate("/login");
         }
       }
     } catch (err) {
-    console.error("Login failed:", err.message);
-    setError("Invalid email or password");
-      }
-    };
+      console.error("Login failed:", err.message);
+      setError("Invalid email or password");
+    }
+  };
 
   return (
-    <div
-      style={{
-        backgroundImage: "url('../login.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        minHeight: "100vh",
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "rgba(255, 255, 255, 0.5)",
-          padding: "2rem",
-          borderRadius: "1rem",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-        }}
-      >
-        <div className="container-fluid d-flex justify-content-center align-items-center" style={{ minHeight: "100vh" }}>
-          <div className="card p-4 shadow-lg" style={{ width: "22rem" }}>
-            <h2 className="text-center mb-4">Login</h2>
-            <form className="mx-auto" onSubmit={handleSubmit}>
-              <div className="mb-3 text-center">
-                <label htmlFor="email" className="form-label">Email address</label>
-                <input type="email" className="form-control" id="email" name="email" placeholder="Enter email" required />
-              </div>
+    <div className="login-page">
+      <div className="login-overlay"></div>
+      <div className="login-content">
+        <div className="login-box">
+          <h2 className="text-center mb-4">Login</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3 text-start">
+              <label htmlFor="email" className="form-label fw-semibold">
+                Email address
+              </label>
+              <input
+                type="email"
+                className="form-control"
+                id="email"
+                name="email"
+                placeholder="Enter email"
+                required
+              />
+            </div>
 
-              <div className="mb-3 text-center">
-                <label htmlFor="password" className="form-label">Password</label>
-                <input type="password" className="form-control" id="password" name="password" placeholder="Password" required />
-              </div>
+            <div className="mb-3 text-start">
+              <label htmlFor="password" className="form-label fw-semibold">
+                Password
+              </label>
+              <input
+                type="password"
+                className="form-control"
+                id="password"
+                name="password"
+                placeholder="Password"
+                required
+              />
+            </div>
 
-              {error && <p className="text-danger text-center">{error}</p>}
+            {error && <p className="text-danger text-center">{error}</p>}
 
-              <div className="d-flex justify-content-center">
-                <button type="submit" className="btn btn-primary w-50">Login</button>
-              </div>
+            <div className="d-flex justify-content-center mt-4">
+              <button type="submit" className="btn btn-primary w-50">
+                Login
+              </button>
+            </div>
 
-              <div className="text-center mt-3">
-                <a href="#" className="text-decoration-none">Forgot password?</a>
-              </div>
-            </form>
-          </div>
+            <div className="text-center mt-3">
+              <a href="#" className="text-decoration-none">
+                Forgot password? Contact an administrator.
+              </a>
+            </div>
+          </form>
         </div>
       </div>
     </div>
