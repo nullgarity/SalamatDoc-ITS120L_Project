@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 import { useAuth } from "../AuthContext";
+import NotificationBell from "../NotificationBell";
 import "../sidebar.css";
 
 export default function AdminSidebar() {
@@ -23,6 +24,9 @@ export default function AdminSidebar() {
         <span className="logo-salamat">Salamat</span>
         <span className="logo-doc">Doc</span>
       </h2>
+
+      <NotificationBell />
+      
       <ul>
         <li>
           <NavLink
