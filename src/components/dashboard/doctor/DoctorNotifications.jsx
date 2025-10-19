@@ -18,9 +18,7 @@ export default function DoctorNotifications() {
       const q = query(collection(db, "notifications"), where("recipientId", "==", userRef));
       const snapshot = await getDocs(q);
       const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setNotifications(
-        data.sort((a, b) => b.timestamp?.seconds - a.timestamp?.seconds)
-      );
+      setNotifications(data.sort((a, b) => b.timestamp?.seconds - a.timestamp?.seconds));
     };
 
     fetchNotifications();
@@ -46,6 +44,7 @@ export default function DoctorNotifications() {
             {notifications.map((n) => (
               <li key={n.id} className={`notification-item ${n.read ? "read" : "unread"}`}>
                 <div className="notification-header">
+                  <h4 className="notification-title">{n.title || "Untitled Notification"}</h4>
                   <p className="notification-message">{n.message}</p>
                   <button
                     className={`mark-button ${n.read ? "mark-unread" : "mark-read"}`}
