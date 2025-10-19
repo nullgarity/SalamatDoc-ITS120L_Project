@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 import { useAuth } from "../AuthContext";
-import NotificationBell from "../notifications/NotificationBell";
+import NotificationBell from "../NotificationBell";
 import "../sidebar.css";
 
 export default function AdminSidebar() {
@@ -34,9 +34,6 @@ export default function AdminSidebar() {
             Dashboard
           </NavLink>
         </li>
-
-        <li><NotificationBell /></li>
-
         <li>
           <button className="logout-btn" onClick={handleLogout}>
             Log out

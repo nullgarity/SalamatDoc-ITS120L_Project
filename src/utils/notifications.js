@@ -8,23 +8,24 @@ import {
   getDocs,
   query,
   where,
+  orderBy,
 } from "firebase/firestore";
 
 /**
  * Send a new notification to a specific user (using Firestore reference).
  * @param {string} userId - The UID of the target user.
+ * @param {string} title - The notification title.
  * @param {string} message - The notification message.
- * @param {string} [type="info"] - Type/category of notification.
  */
-export const sendNotification = async (userId, message, type = "info") => {
+export const sendNotification = async (userId, title, message) => {
   try {
-    const userRef = doc(db, "users", userId);
+    const recipientRef = doc(db, "users", userId);
     await addDoc(collection(db, "notifications"), {
-      user: userRef,
+      recipientId: recipientRef, // matches your Firestore structure
+      title,
       message,
-      type,
       read: false,
-      createdAt: serverTimestamp(),
+      timestamp: serverTimestamp(),
     });
   } catch (error) {
     console.error("Error sending notification:", error);
@@ -50,8 +51,11 @@ export const markAsRead = async (notificationId) => {
  */
 export const markAllAsRead = async (userId) => {
   try {
-    const userRef = doc(db, "users", userId);
-    const q = query(collection(db, "notifications"), where("user", "==", userRef));
+    const recipientRef = doc(db, "users", userId);
+    const q = query(
+      collection(db, "notifications"),
+      where("recipientId", "==", recipientRef)
+    );
     const snapshot = await getDocs(q);
 
     for (const docSnap of snapshot.docs) {
@@ -63,14 +67,18 @@ export const markAllAsRead = async (userId) => {
 };
 
 /**
- * Fetch all notifications for a user.
+ * Fetch all notifications for a user, sorted by latest timestamp first.
  * @param {string} userId - Target user UID.
  * @returns {Array} notifications
  */
 export const getNotifications = async (userId) => {
   try {
-    const userRef = doc(db, "users", userId);
-    const q = query(collection(db, "notifications"), where("user", "==", userRef));
+    const recipientRef = doc(db, "users", userId);
+    const q = query(
+      collection(db, "notifications"),
+      where("recipientId", "==", recipientRef),
+      orderBy("timestamp", "desc") // Sort by latest first
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map((docSnap) => ({
       id: docSnap.id,

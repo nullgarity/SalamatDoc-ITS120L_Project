@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 import { useAuth } from "../AuthContext";
-import NotificationBell from "../notifications/NotificationBell";
+import NotificationBell from "../NotificationBell";
 import "../sidebar.css";
 
 export default function DoctorSidebar() {

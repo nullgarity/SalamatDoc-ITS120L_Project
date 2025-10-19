@@ -13,6 +13,7 @@ import Contact from "./components/start/contact";
 import AdminDashboard from "./components/dashboard/admin/AdminDashboard-alt";
 
 import DoctorDashboard from "./components/dashboard/doctor/DoctorDashboard";
+import DoctorNotifications from "./components/dashboard/doctor/DoctorNotifications";
 import DoctorPatients from "./components/dashboard/doctor/DoctorPatients";
 import DoctorAppointments from "./components/dashboard/doctor/DoctorAppointments";
 import DoctorProfile from "./components/dashboard/doctor/DoctorProfile";
@@ -21,12 +22,11 @@ import ManagementProfile from "./components/dashboard/doctor/ManagementProfile";
 import PatientManagement from "./components/dashboard/doctor/PatientManagement";
 
 import PatientDashboard from "./components/dashboard/patient/PatientDashboard";
+import PatientNotifications from "./components/dashboard/patient/PatientNotifications";
 import PatientAppointments from "./components/dashboard/patient/PatientAppointments";
 import PatientProfile from "./components/dashboard/patient/PatientProfile";
 import DailiesFood from "./components/dashboard/patient/DailiesFood";
 import DailiesMedicine from "./components/dashboard/patient/DailiesMedicine";
-
-import NotificationsPage from "./components/notifications/NotificationsPage";
 
 export default function App() {
   return (
@@ -40,16 +40,6 @@ export default function App() {
 						<Route path="login" element={<Login />} />
 						<Route path="about" element={<AboutUs />} />
 						<Route path="contact" element={<Contact />} />
-
-						{/* Notifications Page */}
-						<Route
-							path=":role/notifications"
-							element={
-								<ProtectedRoute>
-									<NotificationsPage />
-								</ProtectedRoute>
-							}
-						/>
 
 						{/* Admin */}
 						<Route
@@ -67,6 +57,14 @@ export default function App() {
 							element={
 								<ProtectedRoute>
 									<DoctorDashboard />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="doctor/notifications"
+							element={
+								<ProtectedRoute>
+									<DoctorNotifications />
 								</ProtectedRoute>
 							}
 						/>
@@ -125,6 +123,14 @@ export default function App() {
 							element={
 								<ProtectedRoute>
 									<PatientDashboard />
+								</ProtectedRoute>
+							}
+						/>
+						<Route
+							path="patient/notifications"
+							element={
+								<ProtectedRoute>
+									<PatientNotifications />
 								</ProtectedRoute>
 							}
 						/>
