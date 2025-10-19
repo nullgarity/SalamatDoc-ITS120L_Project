@@ -1,44 +1,57 @@
 import React, { useEffect, useState } from "react";
-import { collection, query, where, onSnapshot, doc } from "../../firebase/firestoreService";
+import { FaBell } from "react-icons/fa";
+import { collection, query, where, onSnapshot, doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 import { useAuth } from "../AuthContext";
 import { NavLink } from "react-router-dom";
+import "../sidebar.css"; // make sure this is imported for consistent styling
 
 export default function NotificationBell() {
   const { user } = useAuth();
   const [count, setCount] = useState(0);
+  const [rolePath, setRolePath] = useState("");
 
   useEffect(() => {
     if (!user) return;
+
+    const fetchUserRole = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setRolePath(userData.role?.toLowerCase() || "patient");
+        } else {
+          setRolePath("patient");
+        }
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+        setRolePath("patient");
+      }
+    };
+
+    fetchUserRole();
 
     const userRef = doc(db, "users", user.uid);
     const q = query(collection(db, "notifications"), where("user", "==", userRef));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const unreadCount = snapshot.docs.filter((doc) => !doc.data().read).length;
+      const unreadCount = snapshot.docs.filter((d) => !d.data().read).length;
       setCount(unreadCount);
     });
 
     return () => unsubscribe();
   }, [user]);
 
-  const rolePath = user?.role ? user.role.toLowerCase() : "";
-
   return (
     <NavLink
       to={`/${rolePath}/notifications`}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        padding: "10px 15px",
-        color: "#004080",
-        fontWeight: 500,
-        textDecoration: "none",
-      }}
+      className={({ isActive }) =>
+        `sidebar-link ${isActive ? "active" : ""}`
+      }
     >
-      <div style={{ position: "relative" }}>
+      <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "10px" }}>
         <FaBell size={20} />
+        <span>Notifications</span>
         {count > 0 && (
           <span
             style={{
@@ -57,7 +70,6 @@ export default function NotificationBell() {
           </span>
         )}
       </div>
-      <span>Notifications</span>
     </NavLink>
   );
 }

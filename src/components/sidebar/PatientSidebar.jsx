@@ -12,7 +12,7 @@ export default function PatientSidebar() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate("/login"); // redirect to login page
+      navigate("/login");
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -35,7 +35,9 @@ export default function PatientSidebar() {
           </NavLink>
         </li>
 
-        <li><NotificationBell /></li>
+        <li>
+          <NotificationBell />
+        </li>
 
         <li>
           <NavLink
@@ -45,6 +47,7 @@ export default function PatientSidebar() {
             Dailies – Medicine
           </NavLink>
         </li>
+
         <li>
           <NavLink
             to="/patient/dailies/food"
@@ -53,6 +56,7 @@ export default function PatientSidebar() {
             Dailies – Food
           </NavLink>
         </li>
+
         <li>
           <NavLink
             to="/patient/appointments"
@@ -61,6 +65,7 @@ export default function PatientSidebar() {
             Appointments
           </NavLink>
         </li>
+
         <li>
           <NavLink
             to="/patient/profile"
@@ -69,8 +74,11 @@ export default function PatientSidebar() {
             Profile
           </NavLink>
         </li>
+
         <li>
-          <button className="logout-btn" onClick={handleLogout}>Log out</button>
+          <button className="logout-btn" onClick={handleLogout}>
+            Log out
+          </button>
         </li>
       </ul>
     </aside>
