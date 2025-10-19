@@ -17,20 +17,6 @@ import {
  * @param {string} title - The notification title.
  * @param {string} message - The notification message.
  */
-export const sendNotification = async (userId, title, message) => {
-  try {
-    const recipientRef = doc(db, "users", userId);
-    await addDoc(collection(db, "notifications"), {
-      recipientId: recipientRef, // matches your Firestore structure
-      title,
-      message,
-      read: false,
-      timestamp: serverTimestamp(),
-    });
-  } catch (error) {
-    console.error("Error sending notification:", error);
-  }
-};
 
 /**
  * Mark a specific notification as read.
