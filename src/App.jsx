@@ -26,6 +26,8 @@ import PatientProfile from "./components/dashboard/patient/PatientProfile";
 import DailiesFood from "./components/dashboard/patient/DailiesFood";
 import DailiesMedicine from "./components/dashboard/patient/DailiesMedicine";
 
+import NotificationsPage from "./components/notifications/NotificationsPage";
+
 export default function App() {
   return (
 		<AuthProvider>
@@ -38,6 +40,16 @@ export default function App() {
 						<Route path="login" element={<Login />} />
 						<Route path="about" element={<AboutUs />} />
 						<Route path="contact" element={<Contact />} />
+
+						{/* Notifications Page */}
+						<Route
+							path=":role/notifications"
+							element={
+								<ProtectedRoute>
+									<NotificationsPage />
+								</ProtectedRoute>
+							}
+						/>
 
 						{/* Admin */}
 						<Route

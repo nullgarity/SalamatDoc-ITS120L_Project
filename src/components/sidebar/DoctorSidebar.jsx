@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 import { useAuth } from "../AuthContext";
-import NotificationBell from "../NotificationBell";
+import NotificationBell from "../notifications/NotificationBell";
 import "../sidebar.css";
 
 export default function DoctorSidebar() {
@@ -24,8 +24,6 @@ export default function DoctorSidebar() {
         <span className="logo-salamat">Salamat</span>
         <span className="logo-doc">Doc</span>
       </h2>
-
-      <NotificationBell />
       
       <ul>
         <li>
@@ -33,6 +31,9 @@ export default function DoctorSidebar() {
             Dashboard
           </NavLink>
         </li>
+
+        <li><NotificationBell /></li>
+        
         <li>
           <NavLink to="/doctor/patients" className={({ isActive }) => isActive ? "active" : ""}>
             Patients

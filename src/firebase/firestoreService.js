@@ -1,4 +1,3 @@
-// src/services/firestoreService.js
 import {
 	collection,
 	doc,
