@@ -17,7 +17,21 @@ import {
  * @param {string} title - The notification title.
  * @param {string} message - The notification message.
  */
-
+export const sendNotification = async (userId, title, message) => {
+  try {
+    const recipientRef = doc(db, "users", userId);
+    await addDoc(collection(db, "notifications"), {
+      recipientId: recipientRef,
+      title,
+      message,
+      read: false,
+      timestamp: serverTimestamp(),
+    });
+    console.log(`Notification sent to user: ${userId}`);
+  } catch (error) {
+    console.error("Error sending notification:", error);
+  }
+};
 /**
  * Mark a specific notification as read.
  * @param {string} notificationId - Firestore document ID.
@@ -74,4 +88,5 @@ export const getNotifications = async (userId) => {
     console.error("Error fetching notifications:", error);
     return [];
   }
+  
 };

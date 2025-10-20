@@ -48,9 +48,6 @@ export default function NotificationBell() {
   const rolePath = profile?.role?.toLowerCase() || "patient";
   const targetPath = `/${rolePath}/notifications`;
 
-  return (
-    <NavLink to={targetPath}>
-      <FaBell /> Notifications ({count})
-    </NavLink>
+  return ( <NavLink to={targetPath}> <FaBell /> Notifications ({count}) </NavLink>
   );
 }
