@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig";
 import { useAuth } from "../AuthContext";
+import NotificationBell from "../NotificationBell";
 import "../sidebar.css";
 
 export default function PatientSidebar() {
@@ -11,7 +12,7 @@ export default function PatientSidebar() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate("/login"); // redirect to login page
+      navigate("/login");
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -23,6 +24,7 @@ export default function PatientSidebar() {
         <span className="logo-salamat">Salamat</span>
         <span className="logo-doc">Doc</span>
       </h2>
+
       <ul>
         <li>
           <NavLink
@@ -32,6 +34,11 @@ export default function PatientSidebar() {
             Dashboard
           </NavLink>
         </li>
+
+        <li>
+          <NotificationBell />
+        </li>
+
         <li>
           <NavLink
             to="/patient/dailies/medicine"
@@ -40,6 +47,7 @@ export default function PatientSidebar() {
             Dailies – Medicine
           </NavLink>
         </li>
+
         <li>
           <NavLink
             to="/patient/dailies/food"
@@ -48,6 +56,7 @@ export default function PatientSidebar() {
             Dailies – Food
           </NavLink>
         </li>
+
         <li>
           <NavLink
             to="/patient/appointments"
@@ -56,6 +65,7 @@ export default function PatientSidebar() {
             Appointments
           </NavLink>
         </li>
+
         <li>
           <NavLink
             to="/patient/profile"
@@ -64,8 +74,11 @@ export default function PatientSidebar() {
             Profile
           </NavLink>
         </li>
+
         <li>
-          <button className="logout-btn" onClick={handleLogout}>Log out</button>
+          <button className="logout-btn" onClick={handleLogout}>
+            Log out
+          </button>
         </li>
       </ul>
     </aside>

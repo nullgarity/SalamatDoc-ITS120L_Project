@@ -81,20 +81,39 @@ export default function PatientManagement() {
           }
         }
 
-        // Fetch appointments
+        // Fetch appointments - try multiple approaches
         try {
-          const apptQuery = query(
-            collection(db, "appointments"),
-            where("patientID", "==", patientId)
-          );
-          const apptSnapshot = await getDocs(apptQuery);
-          console.log("Appointments found:", apptSnapshot.docs.length);
+          // Get ALL appointments first to see what we're working with
+          const allApptSnapshot = await getDocs(collection(db, "appointments"));
+          console.log("Total appointments in DB:", allApptSnapshot.docs.length);
           
-          const apptData = apptSnapshot.docs.map(d => ({
+          // Filter manually to see what matches
+          const allAppointments = allApptSnapshot.docs.map(d => ({
             id: d.id,
             ...d.data()
           }));
-          setAppointments(apptData);
+          
+          console.log("Sample appointment data:", allAppointments[0]);
+          
+          // Try to match by checking if patientID contains our user ID
+          const matchingAppts = allAppointments.filter(appt => {
+            const pid = appt.patientID;
+            console.log("Checking patientID:", pid, "Type:", typeof pid);
+            
+            // Check if it's a reference object
+            if (pid && pid.path) {
+              console.log("PatientID has path:", pid.path);
+              return pid.path.includes(patientId);
+            }
+            // Check if it's a string path
+            if (typeof pid === 'string') {
+              return pid.includes(patientId) || pid === patientId;
+            }
+            return false;
+          });
+          
+          console.log("Matching appointments:", matchingAppts.length);
+          setAppointments(matchingAppts);
         } catch (apptErr) {
           console.error("Error fetching appointments:", apptErr);
         }
@@ -119,10 +138,38 @@ export default function PatientManagement() {
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     try {
-      const date = new Date(dateString);
+      let date;
+      // Check if it's a Firestore Timestamp
+      if (dateString.toDate && typeof dateString.toDate === 'function') {
+        date = dateString.toDate();
+      } else if (dateString.seconds) {
+        // Firestore Timestamp object with seconds
+        date = new Date(dateString.seconds * 1000);
+      } else {
+        date = new Date(dateString);
+      }
       return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     } catch (e) {
+      console.error("Error formatting date:", e, dateString);
       return "Invalid date";
+    }
+  };
+
+  const formatTime = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      let date;
+      // Check if it's a Firestore Timestamp
+      if (dateString.toDate && typeof dateString.toDate === 'function') {
+        date = dateString.toDate();
+      } else if (dateString.seconds) {
+        date = new Date(dateString.seconds * 1000);
+      } else {
+        date = new Date(dateString);
+      }
+      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return "N/A";
     }
   };
 
@@ -245,17 +292,38 @@ export default function PatientManagement() {
                 appointments
                   .filter(appt => appt.dateTime || appt.appointmentDate)
                   .sort((a, b) => {
-                    const dateA = new Date(a.dateTime || a.appointmentDate);
-                    const dateB = new Date(b.dateTime || b.appointmentDate);
+                    let dateA, dateB;
+                    
+                    // Handle Firestore Timestamps
+                    const dateFieldA = a.dateTime || a.appointmentDate;
+                    const dateFieldB = b.dateTime || b.appointmentDate;
+                    
+                    if (dateFieldA?.toDate) {
+                      dateA = dateFieldA.toDate();
+                    } else if (dateFieldA?.seconds) {
+                      dateA = new Date(dateFieldA.seconds * 1000);
+                    } else {
+                      dateA = new Date(dateFieldA);
+                    }
+                    
+                    if (dateFieldB?.toDate) {
+                      dateB = dateFieldB.toDate();
+                    } else if (dateFieldB?.seconds) {
+                      dateB = new Date(dateFieldB.seconds * 1000);
+                    } else {
+                      dateB = new Date(dateFieldB);
+                    }
+                    
                     return dateA - dateB;
                   })
                   .slice(0, 3)
                   .map((appt) => (
                     <div key={appt.id} className="appointment-item">
                       <p><strong>Date:</strong> {formatDate(appt.dateTime || appt.appointmentDate)}</p>
-                      <p><strong>Time:</strong> {appt.time || appt.appointmentTime || "N/A"}</p>
-                      <p><strong>Status:</strong> {appt.status || "Scheduled"}</p>
+                      <p><strong>Time:</strong> {formatTime(appt.dateTime || appt.appointmentDate)}</p>
+                      <p><strong>Status:</strong> {appt.status || appt.type || "Scheduled"}</p>
                       {appt.reason && <p><strong>Reason:</strong> {appt.reason}</p>}
+                      {appt.location && <p><strong>Location:</strong> {appt.location}</p>}
                     </div>
                   ))
               ) : (

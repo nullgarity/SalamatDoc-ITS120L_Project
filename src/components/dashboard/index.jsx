@@ -9,12 +9,14 @@ import ManagementProfile from "./admin/ManagementProfile";
 
 // Doctor
 import DoctorDashboard from "./doctor/DoctorDashboard";
+import DoctorNotifications from "./doctor/DoctorNotifications";
 import DoctorProfile from "./doctor/DoctorProfile";
 import DoctorAppointments from "./doctor/DoctorAppointments";
 import PatientManagement from "./doctor/PatientManagement";
 
 // Patient
 import PatientDashboard from "./patient/PatientDashboard";
+import DoctorNotifications from "./patient/PatientNotifications";
 import PatientProfile from "./patient/PatientProfile";
 import PatientAppointments from "./patient/PatientAppointments";
 import DailiesFood from "./patient/DailiesFood";
@@ -38,6 +40,7 @@ export default function DashboardRoutes() {
       return (
 				<Routes>
 					<Route path="/" element={<DoctorDashboard />} />
+          <Route path="notifications" element={<DoctorNotifications />} />
 					<Route path="appointments" element={<DoctorAppointments />} />
 					<Route path="profile" element={<DoctorProfile />} />
 					<Route path="/dashboard" element={<DoctorDashboard />} />
@@ -52,6 +55,7 @@ export default function DashboardRoutes() {
       return (
         <Routes>
           <Route path="/" element={<PatientDashboard />} />
+          <Route path="notifications" element={<PatientNotifications />} />
           <Route path="appointments" element={<PatientAppointments />} />
           <Route path="profile" element={<PatientProfile />} />
           <Route path="dailies/food" element={<DailiesFood />} />

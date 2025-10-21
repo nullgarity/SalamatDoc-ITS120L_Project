@@ -14,6 +14,10 @@ import {
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
 import { useAuth } from "../../../components/AuthContext";
+import { getMessaging, getToken } from "firebase/messaging";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { app } from "../../../firebase/firebaseConfig";
+import { sendNotification } from "../../../utils/notifications";
 import "./DoctorAppointments.css";
 
 /** Safely parse Firestore timestamps or strings */
@@ -118,8 +122,19 @@ export default function DoctorAppointments() {
   const handleDeleteAppointment = async (appointmentID) => {
     if (!window.confirm("Are you sure you want to delete this appointment?")) return;
     try {
-      await deleteDoc(doc(db, "appointments", appointmentID));
+      const apptRef = doc(db, "appointments", appointmentID);
+      const apptSnap = await getDoc(apptRef);
+      const apptData = apptSnap.exists() ? apptSnap.data() : null;
+      const patientId = apptData?.patientId?.id;
+      await deleteDoc(apptRef);
       fetchAppointments(user.uid);
+      if (patientId) {
+        await sendNotification(
+          patientId,
+          "Appointment Cancelled",
+          "Your recent appointment has been cancelled by your doctor."
+        );
+      }
     } catch (err) {
       console.error("Error deleting appointment:", err);
     }
@@ -152,10 +167,21 @@ export default function DoctorAppointments() {
 
       if (editingAppointmentID) {
         await updateDoc(doc(db, "appointments", editingAppointmentID), data);
+        await sendNotification(
+        selectedPatient,
+        "Appointment Updated",
+        "Your appointment details have been updated by your doctor."
+      );
         setEditingAppointmentID(null);
       } else {
         data.createdAt = serverTimestamp();
         await addDoc(collection(db, "appointments"), data);
+
+        await sendNotification(
+        selectedPatient,
+        "New Appointment Scheduled",
+        "Your doctor has scheduled a new appointment with you."
+      );
       }
 
       fetchAppointments(user.uid);

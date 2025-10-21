@@ -1,4 +1,3 @@
-// src/components/dashboard/admin/Management.jsx
 import React from "react";
 
 export default function Management() {
