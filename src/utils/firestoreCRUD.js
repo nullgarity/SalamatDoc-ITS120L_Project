@@ -10,49 +10,103 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
-// CREATE
+// Utility: get current user safely
+function getCurrentUser() {
+  const auth = getAuth();
+  return auth.currentUser;
+}
+
+// CREATE (auto-assign creator UID)
 export async function createDocument(collectionName, data) {
-  const ref = await addDoc(collection(db, collectionName), data);
+  const user = getCurrentUser();
+  if (!user) throw new Error("Unauthorized: User not logged in");
+
+  const sanitizedData = {
+    ...data,
+    createdBy: user.uid,
+    createdAt: new Date(),
+  };
+
+  const ref = await addDoc(collection(db, collectionName), sanitizedData);
   return ref.id;
 }
 
-// READ ALL
+// READ ALL (admins only — filter logic optional)
 export async function getAllDocuments(collectionName) {
   const snapshot = await getDocs(collection(db, collectionName));
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
-// READ ONE
+// READ ONE (only if user is owner or recipient)
 export async function getDocumentById(collectionName, id) {
+  const user = getCurrentUser();
+  if (!user) throw new Error("Unauthorized");
+
   const ref = doc(db, collectionName, id);
   const snapshot = await getDoc(ref);
-  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+  if (!snapshot.exists()) return null;
+
+  const data = { id: snapshot.id, ...snapshot.data() };
+  if (
+    data.createdBy === user.uid ||
+    (Array.isArray(data.recipientIds) && data.recipientIds.includes(user.uid))
+  ) {
+    return data;
+  } else {
+    throw new Error("Access denied");
+  }
 }
 
-// READ BY FIELD
+// READ BY FIELD (auto-scope by user if applicable)
 export async function getDocumentsByField(collectionName, field, value) {
-  const q = query(collection(db, collectionName), where(field, "==", value));
+  const user = getCurrentUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const q = query(
+    collection(db, collectionName),
+    where(field, "==", value)
+  );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const results = snapshot.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() }))
+    .filter(
+      (doc) =>
+        doc.createdBy === user.uid ||
+        (Array.isArray(doc.recipientIds) && doc.recipientIds.includes(user.uid))
+    );
+  return results;
 }
 
-// READ BY REFERENCE
-export async function getDocumentsByReference(collectionName, field, refPath, refId) {
-  const ref = doc(db, refPath, refId);
-  const q = query(collection(db, collectionName), where(field, "==", ref));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-}
-
-// UPDATE
+// UPDATE (only if user is owner)
 export async function updateDocument(collectionName, id, data) {
+  const user = getCurrentUser();
+  if (!user) throw new Error("Unauthorized");
+
   const ref = doc(db, collectionName, id);
-  await updateDoc(ref, data);
+  const snapshot = await getDoc(ref);
+  if (!snapshot.exists()) throw new Error("Document not found");
+
+  const docData = snapshot.data();
+  if (docData.createdBy !== user.uid) throw new Error("Access denied");
+
+  // Never allow changing ownership
+  const { createdBy, ...safeData } = data;
+  await updateDoc(ref, { ...safeData, updatedAt: new Date() });
 }
 
-// DELETE
+// DELETE (only if user is owner)
 export async function deleteDocument(collectionName, id) {
+  const user = getCurrentUser();
+  if (!user) throw new Error("Unauthorized");
+
   const ref = doc(db, collectionName, id);
+  const snapshot = await getDoc(ref);
+  if (!snapshot.exists()) throw new Error("Document not found");
+
+  const docData = snapshot.data();
+  if (docData.createdBy !== user.uid) throw new Error("Access denied");
+
   await deleteDoc(ref);
 }
