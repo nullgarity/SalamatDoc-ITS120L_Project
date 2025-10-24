@@ -104,12 +104,13 @@
 }
 
 .edit-btn {
-  background-color: #4caf50;
+  background-color: #0078d7;
   color: #fff;
-}
-
-.edit-btn:hover {
-  background-color: #45a049;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  font-weight: 500;
 }
 
 .delete-btn {

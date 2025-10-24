@@ -168,8 +168,7 @@ export default function DoctorPatients() {
 								<td>{nextAppointment}</td>
 								<td>{p.currentConcern || "N/A"}</td>
 								<td>
-									<button
-										className="view-details-btn"
+									<button className="dashboard-button-blue" 
 										onClick={() =>
 											navigate(`/doctor/patient-management/${p.id}`)
 										}>

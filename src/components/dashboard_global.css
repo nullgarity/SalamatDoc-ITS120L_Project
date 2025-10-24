@@ -138,3 +138,36 @@ button:hover,
 .mb-1 { margin-bottom: 0.5rem; }
 .mb-2 { margin-bottom: 1rem; }
 .mb-3 { margin-bottom: 1.5rem; }
+
+/* ─── Reusable Dashboard Button Styles ─────────────────────────── */
+.dashboard-button-blue {
+  background-color: #0078d7;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.2s;
+}
+
+.dashboard-button-blue:hover {
+  background-color: #005fa3; /* darker blue */
+}
+
+/* Optional white/outlined version for secondary actions */
+.dashboard-button-white {
+  background-color: #fff;
+  color: #0078d7;
+  border: 1px solid #0078d7;
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.2s;
+}
+
+.dashboard-button-white:hover {
+  background-color: #e6f0fa;
+}
+

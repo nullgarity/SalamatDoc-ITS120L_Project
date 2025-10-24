@@ -4,8 +4,6 @@ import { useAuth } from "../../components/AuthContext";
 
 // Admin
 import AdminDashboard from "./admin/AdminDashboard";
-import Management from "./admin/Management";
-import ManagementProfile from "./admin/ManagementProfile";
 
 // Doctor
 import DoctorDashboard from "./doctor/DoctorDashboard";
@@ -45,7 +43,6 @@ export default function DashboardRoutes() {
 					<Route path="profile" element={<DoctorProfile />} />
 					<Route path="/dashboard" element={<DoctorDashboard />} />
 					<Route path="management" element={<Management />} />
-					<Route path="profile" element={<ManagementProfile />} />
 					<Route path="*" element={<Navigate to="/dashboard" replace />} />
 					<Route path="patient-management/:id"element={<PatientManagement />}/>
 				</Routes>
