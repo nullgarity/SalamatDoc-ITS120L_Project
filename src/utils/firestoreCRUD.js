@@ -110,3 +110,25 @@ export async function deleteDocument(collectionName, id) {
 
   await deleteDoc(ref);
 }
+/**
+ * Fetch documents from a collection where a field equals a specific document reference.
+ * @param {string} collectionName - Firestore collection name.
+ * @param {string} field - The field containing the document reference.
+ * @param {DocumentReference} ref - The referenced document.
+ * @returns {Promise<Array>} Matching documents.
+ */
+export async function getDocumentsByReference(collectionName, field, ref) {
+  const user = getCurrentUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const q = query(collection(db, collectionName), where(field, "==", ref));
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs
+    .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+    .filter(
+      (doc) =>
+        doc.createdBy === user.uid ||
+        (Array.isArray(doc.recipientIds) && doc.recipientIds.includes(user.uid))
+    );
+}
