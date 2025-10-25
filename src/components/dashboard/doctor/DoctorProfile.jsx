@@ -136,11 +136,11 @@ export default function DoctorProfile() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h3>Doctor Profile</h3>
           {!isEditing ? (
-            <button onClick={handleEdit}>Edit Profile</button>
+           <button className="dashboard-button-blue" onClick={handleEdit}>Edit Profile</button>
           ) : (
             <div style={{ display: "flex", gap: "10px" }}>
-              <button onClick={handleSave} disabled={isSaving}>{isSaving ? "Saving..." : "Save"}</button>
-              <button onClick={handleCancel} disabled={isSaving}>Cancel</button>
+              <button className="dashboard-button-blue" onClick={handleSave} disabled={isSaving}>{isSaving ? "Saving..." : "Save"}</button>
+              <button className="dashboard-button-white" onClick={handleCancel} disabled={isSaving}>Cancel</button>
             </div>
           )}
         </div>

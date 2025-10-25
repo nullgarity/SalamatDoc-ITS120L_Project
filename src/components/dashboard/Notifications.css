@@ -71,6 +71,7 @@
 }
 
 /* ─── Buttons ───────────────────────────────── */
+/* ─── Buttons ───────────────────────────────── */
 .mark-button {
   border: none;
   border-radius: 6px;
@@ -81,20 +82,23 @@
   transition: all 0.2s ease;
 }
 
+/* Primary (Mark as Read) — Blue background, white text */
 .mark-read {
-  background: linear-gradient(to right, #0093E9, #80D0C7);
+  background-color: #0078d7;
   color: #fff;
 }
 
 .mark-read:hover {
-  opacity: 0.9;
+  background-color: #005fa3; /* darker blue on hover */
 }
 
+/* Secondary (Mark as Unread) — White background, blue text */
 .mark-unread {
-  background-color: #ccc;
-  color: #333;
+  background-color: #fff;
+  color: #0078d7;
+  border: 1px solid #0078d7;
 }
 
 .mark-unread:hover {
-  background-color: #bfbfbf;
+  background-color: #e6f0fa; /* light blue tint on hover */
 }

@@ -1,258 +1,156 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../../AuthContext";
 import {
-	getAllUsers,
-	addUser,
-	updateUser,
-	deleteUser,
-	generateUserToken,
-} from "../../../services/firestoreService";
-import { useNavigate } from "react-router-dom";
-import "./dashboard.css";
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+import { db } from "../../../firebase/firebaseConfig";
+import "./AdminDashboard.css";
 
 export default function AdminDashboard() {
-	const [users, setUsers] = useState([]);
-	const [loading, setLoading] = useState(true);
-	const [showModal, setShowModal] = useState(false);
-	const [editingUser, setEditingUser] = useState(null);
-	const [formData, setFormData] = useState({
-		name: "",
-		email: "",
-		role: "user",
-		phone: "",
-		address: "",
-	});
+  const { user } = useAuth();
+  const [records, setRecords] = useState([]);
+  const [newRecord, setNewRecord] = useState({ name: "", role: "" });
+  const [editingId, setEditingId] = useState(null);
 
-	useEffect(() => {
-		fetchUsers();
-	}, []);
+  // Fetch users
+  useEffect(() => {
+    const fetchData = async () => {
+      const querySnapshot = await getDocs(collection(db, "users"));
+      const data = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setRecords(data);
+    };
+    fetchData();
+  }, []);
 
-	// 🔹 Fetch all users
-	const fetchUsers = async () => {
-		try {
-			setLoading(true);
-			const userData = await getAllUsers();
-			setUsers(userData);
-		} catch (error) {
-			console.error("Error fetching users:", error);
-			alert("Failed to fetch users");
-		} finally {
-			setLoading(false);
-		}
-	};
+  // Add new user
+  const handleAdd = async () => {
+    if (!newRecord.name.trim() || !newRecord.role.trim()) return;
+    await addDoc(collection(db, "users"), newRecord);
+    setNewRecord({ name: "", role: "" });
+    window.location.reload();
+  };
 
-	// 🔹 Handle form changes
-	const handleInputChange = (e) => {
-		const { name, value } = e.target;
-		setFormData((prev) => ({ ...prev, [name]: value }));
-	};
+  // Update user
+  const handleUpdate = async (id, updatedData) => {
+    const ref = doc(db, "users", id);
+    await updateDoc(ref, updatedData);
+    setEditingId(null);
+    window.location.reload();
+  };
 
-	// 🔹 Add / Update user
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		try {
-			if (editingUser) {
-				await updateUser(editingUser.id, formData);
-				alert("User updated successfully!");
-			} else {
-				const result = await addUser(formData);
-				alert(`User added successfully!\nToken: ${result.token}`);
-			}
+  // Delete user
+  const handleDelete = async (id) => {
+    await deleteDoc(doc(db, "users", id));
+    window.location.reload();
+  };
 
-			resetForm();
-			fetchUsers();
-		} catch (error) {
-			console.error("Error saving user:", error);
-			alert("Failed to save user");
-		}
-	};
+  return (
+    <div className="management-container">
+      <h2 className="management-title">Admin Dashboard</h2>
 
-	const handleEdit = (user) => {
-		setEditingUser(user);
-		setFormData({
-			name: user.name || "",
-			email: user.email || "",
-			role: user.role || "user",
-			phone: user.phone || "",
-			address: user.address || "",
-		});
-		setShowModal(true);
-	};
+      {/* Add User Section */}
+      <div className="management-form align-left compact">
+        <h3>Add New User</h3>
+        <div className="input-row">
+          <input
+            type="text"
+            placeholder="Enter name"
+            value={newRecord.name}
+            onChange={(e) => setNewRecord({ ...newRecord, name: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="Enter role"
+            value={newRecord.role}
+            onChange={(e) => setNewRecord({ ...newRecord, role: e.target.value })}
+          />
+          <button onClick={handleAdd}>Add</button>
+        </div>
+      </div>
 
-	const handleDelete = async (userId) => {
-		if (window.confirm("Are you sure you want to delete this user?")) {
-			try {
-				await deleteUser(userId);
-				alert("User deleted successfully!");
-				fetchUsers();
-			} catch (error) {
-				console.error("Error deleting user:", error);
-				alert("Failed to delete user");
-			}
-		}
-	};
-
-	const handleAddNew = () => {
-		resetForm();
-		setShowModal(true);
-	};
-
-	const resetForm = () => {
-		setEditingUser(null);
-		setFormData({
-			name: "",
-			email: "",
-			role: "user",
-			phone: "",
-			address: "",
-		});
-		setShowModal(false);
-	};
-
-	return (
-		<main className="dashboard-container">
-			<div className="dashboard-header">
-				<h3>Admin Dashboard</h3>
-				<button onClick={handleAddNew} className="btn btn-primary">
-					Add New User
-				</button>
-			</div>
-
-			{loading ? (
-				<p className="loading">Loading users...</p>
-			) : (
-				<div className="dashboard-table-container">
-					<table className="dashboard-table">
-						<thead>
-							<tr>
-								<th>Name</th>
-								<th>Email</th>
-								<th>Role</th>
-								<th>Token</th>
-								<th>Status</th>
-								<th>Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{users.length === 0 ? (
-								<tr>
-									<td colSpan="6" className="no-data">
-										No users found
-									</td>
-								</tr>
-							) : (
-								users.map((user) => (
-									<tr key={user.id}>
-										<td>{user.name}</td>
-										<td>{user.email}</td>
-										<td>{user.role}</td>
-										<td>
-											<code className="token">{user.token}</code>
-										</td>
-										<td>
-											<span
-												className={`status-badge ${
-													user.status === "active" ? "active" : "inactive"
-												}`}>
-												{user.status || "inactive"}
-											</span>
-										</td>
-										<td>
-											<button
-												onClick={() => handleEdit(user)}
-												className="btn btn-edit">
-												Edit
-											</button>
-											<button
-												onClick={() => handleDelete(user.id)}
-												className="btn btn-delete">
-												Delete
-											</button>
-										</td>
-									</tr>
-								))
-							)}
-						</tbody>
-					</table>
-				</div>
-			)}
-
-			{/* Divider */}
-			<div className="dashboard-divider" />
-
-			{/* Modal */}
-			{showModal && (
-				<div className="modal-overlay">
-					<div className="modal-content">
-						<h2>{editingUser ? "Edit User" : "Add New User"}</h2>
-						<form onSubmit={handleSubmit}>
-							<div className="form-group">
-								<label>Name:</label>
-								<input
-									type="text"
-									name="name"
-									value={formData.name}
-									onChange={handleInputChange}
-									required
-								/>
-							</div>
-
-							<div className="form-group">
-								<label>Email:</label>
-								<input
-									type="email"
-									name="email"
-									value={formData.email}
-									onChange={handleInputChange}
-									required
-								/>
-							</div>
-
-							<div className="form-group">
-								<label>Role:</label>
-								<select
-									name="role"
-									value={formData.role}
-									onChange={handleInputChange}>
-									<option value="user">User</option>
-									<option value="admin">Admin</option>
-									<option value="moderator">Moderator</option>
-								</select>
-							</div>
-
-							<div className="form-group">
-								<label>Phone:</label>
-								<input
-									type="tel"
-									name="phone"
-									value={formData.contactNumber}
-									onChange={handleInputChange}
-								/>
-							</div>
-
-							<div className="form-group">
-								<label>Address:</label>
-								<textarea
-									name="address"
-									value={formData.address}
-									onChange={handleInputChange}
-								/>
-							</div>
-
-							<div className="form-actions">
-								<button type="submit" className="btn btn-primary">
-									{editingUser ? "Update" : "Create"}
-								</button>
-								<button
-									type="button"
-									onClick={resetForm}
-									className="btn btn-cancel">
-									Cancel
-								</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			)}
-		</main>
-	);
+      {/* Users Table */}
+      <div className="table-wrapper management-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th style={{ width: "180px" }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {records.map((record) => (
+              <tr key={record.id}>
+                <td>
+                  {editingId === record.id ? (
+                    <input
+                      type="text"
+                      defaultValue={record.name}
+                      onBlur={(e) =>
+                        handleUpdate(record.id, {
+                          ...record,
+                          name: e.target.value,
+                        })
+                      }
+                    />
+                  ) : (
+                    record.name
+                  )}
+                </td>
+                <td>
+                  {editingId === record.id ? (
+                    <input
+                      type="text"
+                      defaultValue={record.role}
+                      onBlur={(e) =>
+                        handleUpdate(record.id, {
+                          ...record,
+                          role: e.target.value,
+                        })
+                      }
+                    />
+                  ) : (
+                    record.role
+                  )}
+                </td>
+                <td className="actions-cell">
+                  {editingId === record.id ? (
+                    <button
+                      className="action-btn cancel-btn"
+                      onClick={() => setEditingId(null)}
+                    >
+                      Cancel
+                    </button>
+                  ) : (
+                    <div className="action-row">
+                      <button
+                        className="action-btn edit-btn"
+                        onClick={() => setEditingId(record.id)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="action-btn delete-btn"
+                        onClick={() => handleDelete(record.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }

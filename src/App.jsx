@@ -10,15 +10,13 @@ import AboutUs from "./components/start/aboutus";
 import Contact from "./components/start/contact";
 
 // ─── Dashboard Pages ─────────────────
-import AdminDashboard from "./components/dashboard/admin/AdminDashboard-alt";
+import AdminDashboard from "./components/dashboard/admin/AdminDashboard";
 
 import DoctorDashboard from "./components/dashboard/doctor/DoctorDashboard";
 import DoctorNotifications from "./components/dashboard/doctor/DoctorNotifications";
 import DoctorPatients from "./components/dashboard/doctor/DoctorPatients";
 import DoctorAppointments from "./components/dashboard/doctor/DoctorAppointments";
 import DoctorProfile from "./components/dashboard/doctor/DoctorProfile";
-import Management from "./components/dashboard/doctor/Management";
-import ManagementProfile from "./components/dashboard/doctor/ManagementProfile";
 import PatientManagement from "./components/dashboard/doctor/PatientManagement";
 
 import PatientDashboard from "./components/dashboard/patient/PatientDashboard";
@@ -89,22 +87,6 @@ export default function App() {
 							element={
 								<ProtectedRoute>
 									<DoctorAppointments />
-								</ProtectedRoute>
-							}
-						/>
-						<Route
-							path="doctor/management"
-							element={
-								<ProtectedRoute>
-									<Management />
-								</ProtectedRoute>
-							}
-						/>
-						<Route
-							path="doctor/management-profile"
-							element={
-								<ProtectedRoute>
-									<ManagementProfile />
 								</ProtectedRoute>
 							}
 						/>
