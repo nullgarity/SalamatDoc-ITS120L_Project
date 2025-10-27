@@ -6,6 +6,9 @@
   border-radius: 15px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+
+  animation: fadeInUp; /* referring directly to the animation's @keyframe declaration */
+  animation-duration: 0.45s; /* don't forget to set a duration! */
 }
 
 .patients-header {
