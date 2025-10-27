@@ -79,6 +79,13 @@
   border-top: 2px solid #ddd;
 }
 
+/* Prevents flashbangs when first opening a page */
+.bg-animation {
+  background-color: rgb(165, 165, 165);
+  min-height: 100vh;
+  width: 100%;
+}
+
 /* LOGIN PAGE
 
 /* Full-page background */

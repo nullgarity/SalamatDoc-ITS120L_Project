@@ -24,6 +24,9 @@
   width: 90%; /* wider container */
   max-width: 1000px; /* controls maximum width */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  animation: fadeInUp;
+  animation-duration: 0.45s;
 }
 
 /* Section headings centered */

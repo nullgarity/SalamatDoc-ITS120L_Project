@@ -57,6 +57,7 @@ export default function Login() {
   };
 
   return (
+    <div className="bg-animation">
     <div className="login-page">
       <div className="login-overlay"></div>
       <div className="login-content animate__animated">
@@ -107,6 +108,7 @@ export default function Login() {
           </form>
         </div>
       </div>
+    </div>
     </div>
   );
 }

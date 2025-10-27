@@ -13,6 +13,9 @@
   padding: 30px;
   width: 100%;
   max-width: 900px;
+
+  animation: fadeInUp; /* referring directly to the animation's @keyframe declaration */
+  animation-duration: 0.45s; /* don't forget to set a duration! */
 }
 
 .profile-title {

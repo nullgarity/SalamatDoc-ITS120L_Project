@@ -4,7 +4,7 @@ import "./start.css";
 
 export default function AboutUs() {
   return (
-
+    <div className="bg-animation">
       <div
         className="page-section"
         style={{ backgroundImage: "url('../Home.png')"}}
@@ -23,6 +23,7 @@ export default function AboutUs() {
             Better services, better care, better health. Salamat, Doc!
           </p>
         </div>
+    </div>
     </div>
   );
 }
