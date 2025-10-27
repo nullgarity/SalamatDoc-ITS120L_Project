@@ -59,7 +59,7 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-overlay"></div>
-      <div className="login-content">
+      <div className="login-content animate__animated">
         <div className="login-box">
           <h2 className="text-center mb-4">Login</h2>
           <form onSubmit={handleSubmit}>

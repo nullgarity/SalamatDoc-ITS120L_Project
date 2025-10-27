@@ -9,6 +9,8 @@
   background-position: center;
   position: relative;
   color: #212529;
+  animation: fadeIn; /* referring directly to the animation's @keyframe declaration */
+  animation-duration: 0.5s; /* don't forget to set a duration! */
 }
 
 /* Semi-transparent overlay */
@@ -33,6 +35,9 @@
   padding: 3rem;
   max-width: 700px;
   width: 90%;
+  
+  animation: fadeInUp; /* referring directly to the animation's @keyframe declaration */
+  animation-duration: 0.45s; /* don't forget to set a duration! */
 }
 
 /* 🔹 Slimmer container specifically for the login page */
@@ -84,6 +89,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
+
+  animation: fadeIn; /* referring directly to the animation's @keyframe declaration */
+  animation-duration: 0.5s; /* don't forget to set a duration! */
 }
 
 /* Semi-transparent white overlay */
@@ -104,6 +112,10 @@
   display: flex;
   justify-content: center;
   width: 100%;
+
+  animation: fadeInUp; /* referring directly to the animation's @keyframe declaration */
+  animation-duration: 0.45s; /* don't forget to set a duration! */
+
 }
 
 /* Login box styling */
@@ -114,4 +126,5 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   width: 350px; /* thinner box */
   text-align: center;
+  ;
 }
